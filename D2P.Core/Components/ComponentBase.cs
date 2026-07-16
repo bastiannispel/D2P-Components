@@ -75,8 +75,6 @@ namespace D2P.Core.Components {
         public virtual void Commit(bool deleteExisting = true)
         {
             if (deleteExisting) {
-                //var existing = Instantiation.InstancesByName(Name); // 800 ticks            
-                //Objects.DeleteComponents(existingObjects.Where(obj => obj.Id != ID));
                 var existingObjects = Objects.ObjectsByName(Name, ObjectType.AnyObject)
                     .Where(obj => obj.GroupCount != 0 && !obj.GetGroupList().Contains(GroupIndex))
                     .Select(obj => obj.Id);

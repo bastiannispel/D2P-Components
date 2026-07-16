@@ -1,7 +1,8 @@
-﻿using D2P.Core.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using D2P.Core.Interfaces;
 
 namespace D2P.Core.Components {
     public static class ComponentTable {

@@ -44,7 +44,8 @@ namespace D2P.Core.Utility {
         }
         public static IEnumerable<T> InstancesFromObjects<T>(IEnumerable<Guid> objectIds) where T : class, IComponentBase
         {
-            return InstancesFromObjects<T>(objectIds);
+            var rhObjects = objectIds.Select(id => Settings.ActiveDoc.Objects.Find(id));
+            return InstancesFromObjects<T>(rhObjects);
         }
         public static IEnumerable<T> InstancesFromObjects<T>(IEnumerable<RhinoObject> rhObjects) where T : class, IComponentBase
         {
