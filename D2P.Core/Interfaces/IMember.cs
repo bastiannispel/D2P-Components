@@ -1,6 +1,7 @@
-﻿using Rhino.DocObjects;
+﻿using System.Collections.Generic;
+
+using Rhino.DocObjects;
 using Rhino.Geometry;
-using System.Collections.Generic;
 
 namespace D2P.Core.Interfaces {
 

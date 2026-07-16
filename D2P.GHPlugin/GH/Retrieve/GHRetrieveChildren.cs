@@ -1,15 +1,13 @@
-﻿using D2P.Core.Interfaces;
-using D2P.GHPlugin;
-using Grasshopper.Kernel;
-using Rhino;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace D2P.GHPlugin.GH.Retrieve
-{
-    public class GHRetrieveChildren : GHComponentPreview
-    {
+using D2P.Core.Interfaces;
+
+using Grasshopper.Kernel;
+
+namespace D2P.GHPlugin.GH.Retrieve {
+    public class GHRetrieveChildren : GHComponentPreview {
         /// <summary>
         /// Initializes a new instance of the Component_RetrieveParentComponent class.
         /// </summary>
@@ -48,8 +46,7 @@ namespace D2P.GHPlugin.GH.Retrieve
             DA.GetData(0, ref component);
             DA.GetDataList(1, filterTypes);
 
-            if (component == null)
-            {
+            if (component == null) {
                 var msg = $"Component is null !";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
                 return;
@@ -58,8 +55,7 @@ namespace D2P.GHPlugin.GH.Retrieve
             var repository = (component.Context ?? _modelContext).Repository;
             repository.Attach(component);
             var children = repository.GetChildren<IComponentBase>(component, filterTypes);
-            if (children == null || !children.Any())
-            {
+            if (children == null || !children.Any()) {
                 var msg = $"ChildMembers of component {component.Name} not found !";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
                 return;
@@ -72,10 +68,8 @@ namespace D2P.GHPlugin.GH.Retrieve
         /// <summary>
         /// Provides an Icon for the component.
         /// </summary>
-        protected override System.Drawing.Bitmap Icon
-        {
-            get
-            {
+        protected override System.Drawing.Bitmap Icon {
+            get {
                 //You can add image files to your project resources and access them like this:                
                 return Properties.Resources.GH_RetrieveChildren;
             }
@@ -84,8 +78,7 @@ namespace D2P.GHPlugin.GH.Retrieve
         /// <summary>
         /// Gets the unique ID for this component. Do not change this ID after release.
         /// </summary>
-        public override Guid ComponentGuid
-        {
+        public override Guid ComponentGuid {
             get { return new Guid("730EF6B1-3B10-4A7E-B963-EF11988700DB"); }
         }
     }

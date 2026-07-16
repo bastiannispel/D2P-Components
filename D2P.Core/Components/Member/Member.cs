@@ -1,12 +1,14 @@
-﻿using D2P.Core.Components.Primitives;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+
+using D2P.Core.Components.Primitives;
 using D2P.Core.Extensions;
 using D2P.Core.Interfaces;
 using D2P.Core.Utility;
+
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace D2P.Core.Components.Member {
     public class Member<T> : Member, IMember<T> where T : GeometryBase {

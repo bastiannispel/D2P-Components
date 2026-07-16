@@ -1,7 +1,9 @@
-﻿using D2P.Core.Components;
+﻿using System;
+
+using D2P.Core.Components;
 using D2P.Core.Interfaces;
+
 using Grasshopper.Kernel;
-using System;
 
 namespace D2P.GHPlugin.GH.Retrieve {
     public class GHGetComponentIndex : GH_Component {

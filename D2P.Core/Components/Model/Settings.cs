@@ -1,6 +1,7 @@
+using System.Drawing;
+
 using Rhino;
 using Rhino.DocObjects;
-using System.Drawing;
 
 namespace D2P.Core.Components {
     public static class Settings {

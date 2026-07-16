@@ -1,7 +1,9 @@
-﻿using D2P.Core.Interfaces;
+﻿using System;
+
+using D2P.Core.Interfaces;
+
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System;
 
 namespace D2P.Core.Components.Primitives {
 

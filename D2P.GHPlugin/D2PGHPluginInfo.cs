@@ -1,6 +1,7 @@
-﻿using Grasshopper.Kernel;
-using System;
+﻿using System;
 using System.Drawing;
+
+using Grasshopper.Kernel;
 
 namespace D2P.GHPlugin {
     public class D2PGHPluginInfo : GH_AssemblyInfo {

@@ -1,6 +1,7 @@
-﻿using Rhino.DocObjects;
+﻿using System;
+
+using Rhino.DocObjects;
 using Rhino.Geometry;
-using System;
 
 namespace D2P.Core.Interfaces {
     public interface IBaseObject {

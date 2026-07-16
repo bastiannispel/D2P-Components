@@ -1,9 +1,10 @@
-﻿using D2P.Core.Components;
-using D2P.GHPlugin;
+﻿using System;
+
+using D2P.Core.Components;
+
 using Grasshopper.Kernel;
-using Rhino;
+
 using Rhino.Geometry;
-using System;
 
 namespace D2P.GHPlugin.GH.Create {
     public class GHCreateComponent : GHComponentPreview {

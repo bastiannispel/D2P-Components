@@ -1,5 +1,6 @@
-﻿using D2P.Core.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using D2P.Core.Interfaces;
 
 namespace D2P.Core.Extensions {
     public static class BaseObjectExtensions {

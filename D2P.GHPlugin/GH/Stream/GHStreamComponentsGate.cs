@@ -1,9 +1,8 @@
-﻿using D2P.GHPlugin;
-using Grasshopper.Kernel;
-using Rhino;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Grasshopper.Kernel;
 
 namespace D2P.GHPlugin.GH.Stream {
     public class GHStreamComponentsGate : GHVariableParameterComponent {

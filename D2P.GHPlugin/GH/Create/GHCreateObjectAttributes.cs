@@ -1,7 +1,9 @@
-﻿using Grasshopper.Kernel;
-using Rhino.DocObjects;
-using System;
+﻿using System;
 using System.Drawing;
+
+using Grasshopper.Kernel;
+
+using Rhino.DocObjects;
 
 namespace D2P.GHPlugin.GH.Create {
     public class GHCreateObjectAttributes : GHComponentBase {

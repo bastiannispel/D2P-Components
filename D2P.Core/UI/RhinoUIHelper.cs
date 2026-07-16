@@ -1,9 +1,9 @@
-﻿using D2P.Core.Interfaces;
-using D2P.Core.Repository;
-using D2P.Core.Utility;
-using Rhino.Input.Custom;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using D2P.Core.Interfaces;
+
+using Rhino.Input.Custom;
 
 namespace D2P.Core.UI {
     public static class RhinoUIHelper {

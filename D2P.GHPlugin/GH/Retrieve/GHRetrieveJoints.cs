@@ -1,15 +1,13 @@
-﻿using D2P.Core.Interfaces;
-using D2P.GHPlugin;
-using Grasshopper.Kernel;
-using Rhino;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace D2P.GHPlugin.GH.Retrieve
-{
-    public class GHRetrieveJoints : GHComponentPreview
-    {
+using D2P.Core.Interfaces;
+
+using Grasshopper.Kernel;
+
+namespace D2P.GHPlugin.GH.Retrieve {
+    public class GHRetrieveJoints : GHComponentPreview {
         /// <summary>
         /// Initializes a new instance of the GH_RetrieveJoints class.
         /// </summary>
@@ -49,8 +47,7 @@ namespace D2P.GHPlugin.GH.Retrieve
             DA.GetData(0, ref component);
             DA.GetDataList(1, filterTypes);
 
-            if (component == null)
-            {
+            if (component == null) {
                 var msg = $"Component is null !";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
                 return;
@@ -59,15 +56,13 @@ namespace D2P.GHPlugin.GH.Retrieve
             var repository = (component.Context ?? _modelContext).Repository;
             repository.Attach(component);
             var joints = repository.GetJoints<IComponentBase>(component, filterTypes);
-            if (joints == null || !joints.Any())
-            {
+            if (joints == null || !joints.Any()) {
                 var msg = $"Joints of component {component.Name} not found !";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, msg);
                 return;
             }
 
-            foreach (var joint in joints)
-            {
+            foreach (var joint in joints) {
                 if (!_components.Contains(joint))
                     _components.Add(joint);
             }
@@ -78,10 +73,8 @@ namespace D2P.GHPlugin.GH.Retrieve
         /// <summary>
         /// Provides an Icon for the component.
         /// </summary>
-        protected override System.Drawing.Bitmap Icon
-        {
-            get
-            {
+        protected override System.Drawing.Bitmap Icon {
+            get {
                 //You can add image files to your project resources and access them like this:                                
                 return Properties.Resources.GH_RetrieveJoints;
             }
@@ -90,8 +83,7 @@ namespace D2P.GHPlugin.GH.Retrieve
         /// <summary>
         /// Gets the unique ID for this component. Do not change this ID after release.
         /// </summary>
-        public override Guid ComponentGuid
-        {
+        public override Guid ComponentGuid {
             get { return new Guid("0D9BB504-81E8-439E-8F3F-74904EE834E1"); }
         }
     }

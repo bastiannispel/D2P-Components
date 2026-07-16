@@ -1,9 +1,11 @@
-﻿using D2P.Core.Components.Member;
+﻿using System;
+using System.Collections.Generic;
+
+using D2P.Core.Components.Member;
 using D2P.Core.Extensions;
 using D2P.Core.Interfaces;
+
 using Grasshopper.Kernel;
-using System;
-using System.Collections.Generic;
 
 namespace D2P.GHPlugin.GH.Modify {
     public class GHRegisterComponentMembers : GHComponentPreview {

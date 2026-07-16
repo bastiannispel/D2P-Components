@@ -1,9 +1,10 @@
-﻿using D2P.Core.Extensions;
-using D2P.Core.Interfaces;
-using D2P.Core.Utility;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
+using D2P.Core.Extensions;
+using D2P.Core.Interfaces;
+using D2P.Core.Utility;
 
 namespace D2P.Core.Components.Member {
     public abstract class MemberCollection : IMemberCollection {

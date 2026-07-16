@@ -1,8 +1,8 @@
-﻿using D2P.Core.Interfaces;
-using D2P.GHPlugin;
+﻿using System;
+
+using D2P.Core.Interfaces;
+
 using Grasshopper.Kernel;
-using Rhino;
-using System;
 
 namespace D2P.GHPlugin.GH.Retrieve {
     public class GHRetrieveParent : GHComponentPreview {

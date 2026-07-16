@@ -1,8 +1,10 @@
-﻿using D2P.Core.Interfaces;
-using Rhino.Geometry;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
+
+using D2P.Core.Interfaces;
+
+using Rhino.Geometry;
 
 namespace D2P.Core.Components.Member {
 

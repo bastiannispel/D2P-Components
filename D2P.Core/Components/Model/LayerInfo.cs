@@ -1,11 +1,10 @@
-using D2P.Core.Interfaces;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace D2P.Core.Components
-{
-    public class LayerInfo : ILayerInfo
-    {
+using D2P.Core.Interfaces;
+
+namespace D2P.Core.Components {
+    public class LayerInfo : ILayerInfo {
         public string RawLayerName { get; } = string.Empty;
         public Color LayerColor { get; } = Color.Black;
 
@@ -17,8 +16,7 @@ namespace D2P.Core.Components
         }
     }
 
-    public class LayerInfoComparer : IComparer<ILayerInfo>
-    {
+    public class LayerInfoComparer : IComparer<ILayerInfo> {
         public int Compare(ILayerInfo x, ILayerInfo y)
         {
             if (x == y) return 0;

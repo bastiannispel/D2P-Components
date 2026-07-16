@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 
 namespace D2P.Core.Components {
     public sealed class TypeRegistration {

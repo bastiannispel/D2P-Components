@@ -1,13 +1,12 @@
-﻿using D2P.Core.Interfaces;
-using D2P.Core.Utility;
-using D2P.GHPlugin;
-using Grasshopper.Kernel;
-using Rhino;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+
+using D2P.Core.Utility;
+
+using Grasshopper.Kernel;
 
 namespace D2P.GHPlugin.GH.Utility {
     public class GHExportComponents : GHComponentPreview {

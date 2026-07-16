@@ -1,10 +1,12 @@
 ﻿namespace D2P.Core.Utility {
-    using D2P.Core.Interfaces;
-    using Rhino;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Linq;
+
+    using D2P.Core.Interfaces;
+
+    using Rhino;
 
     public sealed class LayerNode {
         private readonly Dictionary<string, LayerNode> _childIndex = new Dictionary<string, LayerNode>(StringComparer.Ordinal);

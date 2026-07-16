@@ -1,12 +1,13 @@
-﻿using D2P.Core.Components;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using D2P.Core.Components;
 using D2P.Core.Components.Member;
 using D2P.Core.Interfaces;
+
 using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace D2P.Core.Utility {
     public static class Members {

@@ -1,14 +1,15 @@
-﻿using D2P.Core.Components;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
 using D2P.Core.Interfaces;
 using D2P.Core.Repository;
 using D2P.Core.Utility;
-using D2P.GHPlugin;
+
 using Grasshopper.Kernel;
+
 using Rhino;
 using Rhino.DocObjects;
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace D2P.GHPlugin.GH.Utility {
     public class GHBakeComponents : GHComponentPreview {

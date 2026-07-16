@@ -1,6 +1,8 @@
-﻿using D2P.Core.Components;
+﻿using System;
+
+using D2P.Core.Components;
+
 using Grasshopper.Kernel;
-using System;
 
 namespace D2P.GHPlugin.GH.Utility {
     public class GHDeconstructComponentType : GHComponentBase {

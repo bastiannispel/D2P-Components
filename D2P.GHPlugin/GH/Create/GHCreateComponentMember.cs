@@ -1,10 +1,13 @@
-﻿using D2P.Core.Components.Member;
+﻿using System;
+using System.Collections.Generic;
+
+using D2P.Core.Components.Member;
 using D2P.Core.Interfaces;
+
 using Grasshopper.Kernel;
+
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System;
-using System.Collections.Generic;
 
 namespace D2P.GHPlugin.GH.Create {
     public class GHCreateComponentMember : GHComponentBase {

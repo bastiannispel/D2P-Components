@@ -5,7 +5,6 @@ using System.Windows.Forms;
 
 using D2P.Core;
 using D2P.Core.Interfaces;
-using D2P.GHPlugin;
 
 using Grasshopper;
 using Grasshopper.Kernel;
