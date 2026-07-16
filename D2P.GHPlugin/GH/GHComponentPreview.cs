@@ -1,17 +1,24 @@
-﻿using D2P.Core.Interfaces;
+﻿using System.Collections.Generic;
+using System.Drawing;
+
+using D2P.Core.Components;
+using D2P.Core.Interfaces;
 using D2P.Core.Utility;
+
 using Grasshopper.Kernel;
+
+using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System.Collections.Generic;
-using System.Drawing;
 
 namespace D2P.GHPlugin.GH {
     public abstract class GHComponentPreview : GHComponentBase {
 
         protected BoundingBox _box;
+        protected ModelContext _modelContext = D2PGHContext.Create(RhinoDoc.ActiveDoc);
         protected List<IComponentBase> _components = new List<IComponentBase>();
         private List<GeometryBase> _geometries = new List<GeometryBase>();
+
 
         public override BoundingBox ClippingBox => _box;
 

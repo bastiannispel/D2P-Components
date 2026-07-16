@@ -1,5 +1,5 @@
 ﻿using D2P.Core.Components;
-using D2P.Core.Platforms;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
 using System;
 using System.Drawing;
@@ -54,7 +54,7 @@ namespace D2P.GHPlugin.GH.Create {
             DA.GetData(3, ref layerColor);
 
             if (string.IsNullOrEmpty(typeName)) {
-                var componentLayer = D2P.Core.Utility.Layers.FindComponentLayerByType(typeID);
+                var componentLayer = D2P.Core.Utility.Layers.FindComponentLayerByType(Rhino.RhinoDoc.ActiveDoc, typeID);
                 if (componentLayer == null) {
                     var msg = $"Layer of type {typeID} does not exist in the RhinoDoc yet. Cannot auto-generate layer description !";
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
@@ -66,7 +66,7 @@ namespace D2P.GHPlugin.GH.Create {
             if (labelSize <= 0)
                 labelSize = Rhino.RhinoDoc.ActiveDoc.DimStyles.Current.TextHeight;
 
-            ComponentTable.RegisterComponent<GHComponent>(typeID);
+            D2PGHContext.RegisterType(Rhino.RhinoDoc.ActiveDoc, typeID);
 
             var cls = new ComponentType(typeID, typeName, labelSize, layerColor);
             DA.SetData(0, cls);

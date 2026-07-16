@@ -1,5 +1,6 @@
 ﻿namespace D2P.Core.Utility {
     using D2P.Core.Interfaces;
+    using Rhino;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -38,10 +39,10 @@
     }
 
     public static class LayerTreeBuilder {
-        public static LayerNode BuildTree(IComponentBase component)
+        public static LayerNode BuildTree(RhinoDoc doc, IComponentBase component)
         {
-            var componentLayers = Layers.GetComponentLayers(component);
-            var baseLayer = Layers.FindComponentTypeRootLayer(component);
+            var componentLayers = Layers.GetComponentLayers(doc, component);
+            var baseLayer = Layers.FindComponentTypeRootLayer(doc, component);
 
             var layerSegments = componentLayers
                 .Select(l => l.FullPath.Replace(baseLayer.FullPath, ""))
@@ -72,7 +73,6 @@
                     current = current.GetOrAddChild(part);
                     current.Color = layer.Color;
                 }
-
             }
             SortRecursive(root);
             return root;
@@ -85,5 +85,4 @@
                 SortRecursive(c);
         }
     }
-
 }

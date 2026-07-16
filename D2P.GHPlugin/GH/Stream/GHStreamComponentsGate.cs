@@ -1,4 +1,6 @@
-﻿using Grasshopper.Kernel;
+﻿using D2P.GHPlugin;
+using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +38,8 @@ namespace D2P.GHPlugin.GH.Stream {
             var ids = new List<Guid>();
             DA.GetDataList(0, ids);
 
-            _components = D2P.Core.Utility.Instantiation.InstancesFromObjects(ids).ToList();
+            var context = _modelContext;
+            _components = context.Repository.GetFromObjects<D2P.Core.Interfaces.IComponentBase>(ids).ToList();
             _components.Sort();
 
             var componentGroups = _components.GroupBy(comp => comp.TypeId);

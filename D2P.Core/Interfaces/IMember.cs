@@ -6,6 +6,7 @@ namespace D2P.Core.Interfaces {
 
     public interface IMember : IMemberCollection, IDocObject<IMember> {
         IComponentBase Component { get; set; }
+        bool IsDirty { get; }
 
         ILayerInfo LayerInfo { get; set; }
         IEnumerable<IBaseObject> BaseObjects { get; set; }
@@ -19,6 +20,8 @@ namespace D2P.Core.Interfaces {
         void SetObjects(IEnumerable<GeometryBase> geometries);
 
         void Cache();
+        void Commit(bool deleteExisting, bool onlyDirty);
+        void MarkClean();
     }
 
     public interface IMember<T> : IMember where T : GeometryBase {

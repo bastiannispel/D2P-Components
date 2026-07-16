@@ -1,8 +1,12 @@
-﻿using D2P.Core.Utility;
+﻿using D2P.Core.Interfaces;
+using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace D2P.GHPlugin.GH.Utility {
@@ -54,6 +58,8 @@ namespace D2P.GHPlugin.GH.Utility {
             if (!directory.Exists)
                 return;
 
+            var context = _components.FirstOrDefault()?.Context ?? _modelContext;
+
             if (_exportOneFile) {
                 var saveFileDialog = new SaveFileDialog {
                     Filter = "3dm files (*.3dm)|*3dm",
@@ -62,13 +68,13 @@ namespace D2P.GHPlugin.GH.Utility {
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK) {
                     var fileName = Path.GetFileNameWithoutExtension(saveFileDialog.FileName);
-                    IO.ExportWithHeadless(_components, directoryPath, fileName);
+                    IO.ExportWithHeadless(context, _components, directoryPath, fileName);
                 }
                 else return;
             }
             else {
                 foreach (var component in _components) {
-                    IO.ExportWithHeadless(component, directory.FullName);
+                    IO.ExportWithHeadless(context, component, directory.FullName);
                 }
             }
 

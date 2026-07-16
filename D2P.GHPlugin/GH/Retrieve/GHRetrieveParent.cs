@@ -1,81 +1,53 @@
 ﻿using D2P.Core.Interfaces;
-using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 
 namespace D2P.GHPlugin.GH.Retrieve {
     public class GHRetrieveParent : GHComponentPreview {
-        /// <summary>
-        /// Initializes a new instance of the Component_RetrieveParentComponent class.
-        /// </summary>
         public GHRetrieveParent()
           : base("RetrieveParentComponent", "ParentMember",
               "Retrieves the parent component of a given input component. E.g. If the component-instance is named “aa.01”, “aa.02”, “aa.03”, ... the parent-instance is named “aa”",
               "D2P", "02 Retrieve")
         { }
 
-        /// <summary>
-        /// Registers all the input parameters for this component.
-        /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("ParentComponent", "C", "The in-memory representation of the component-parent instance", GH_ParamAccess.item);
         }
 
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             IComponentBase component = null;
             DA.GetData(0, ref component);
 
             if (component == null) {
-                var msg = $"Component is null !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Component is null !");
                 return;
             }
 
-            var parent = Components.GetParentComponent(component, out int parentsFound);
+            var repository = (component.Context ?? _modelContext).Repository;
+            repository.Attach(component);
+            var parent = repository.GetParent<IComponentBase>(component, out int parentsFound);
             if (parent == null) {
-                var msg = $"ParentMember of component {component.Name} not found !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"ParentMember of component {component.Name} not found !");
                 return;
             }
-            if (parentsFound > 1) {
-                var msg = $"Found {parentsFound} parents for component {component.Name} !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
-                return;
-            }
+            if (parentsFound > 1)
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Found {parentsFound} parents for component {component.Name} !");
 
             _components.Add(parent);
             DA.SetData(0, parent);
         }
 
-        /// <summary>
-        /// Provides an Icon for the component.
-        /// </summary>
-        protected override System.Drawing.Bitmap Icon {
-            get {
-                //You can add image files to your project resources and access them like this:                
-                return Properties.Resources.GH_RetrieveParent;
-            }
-        }
+        protected override System.Drawing.Bitmap Icon => Properties.Resources.GH_RetrieveParent;
 
-        /// <summary>
-        /// Gets the unique ID for this component. Do not change this ID after release.
-        /// </summary>
-        public override Guid ComponentGuid {
-            get { return new Guid("92F56E9E-C2DA-4ADE-9D04-061A6F88C739"); }
-        }
+        public override Guid ComponentGuid => new Guid("92F56E9E-C2DA-4ADE-9D04-061A6F88C739");
     }
 }

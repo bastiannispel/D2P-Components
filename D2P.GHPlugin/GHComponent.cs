@@ -1,16 +1,15 @@
-﻿using D2P.Core.Components;
-using D2P.Core.Interfaces;
-using Rhino.Geometry;
-using System.Drawing;
 using System.Linq;
 
+using D2P.Core.Components;
+using D2P.Core.Interfaces;
 
-namespace D2P.Core.Platforms {
+using Rhino.Geometry;
+
+namespace D2P.GHPlugin {
+    /// <summary>
+    /// Runtime component used by Grasshopper for dynamically typed component instances.
+    /// </summary>
     public class GHComponent : ComponentBase {
-        public override string TypeId { get; set; }
-        public override string TypeName { get; set; }
-        public override Color LayerColor { get; set; }
-        public override double LabelSize { get; set; }
 
         public GHComponent() : base() { }
         protected GHComponent(IComponentBase other) : base(other) { }

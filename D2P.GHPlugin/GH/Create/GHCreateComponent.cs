@@ -1,6 +1,7 @@
 ﻿using D2P.Core.Components;
-using D2P.Core.Platforms;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using Rhino.Geometry;
 using System;
 
@@ -54,7 +55,9 @@ namespace D2P.GHPlugin.GH.Create {
             var parentName = parent?.ShortName ?? parent?.ToString();
             name = string.IsNullOrEmpty(parentName) ? name : $"{parentName}{Settings.NameDelimiter}{name}";
 
+            var context = _modelContext;
             var component = new GHComponent(componentType, name, plane);
+            context.Repository.Attach(component);
             _components.Add(component);
 
             DA.SetData(0, component);

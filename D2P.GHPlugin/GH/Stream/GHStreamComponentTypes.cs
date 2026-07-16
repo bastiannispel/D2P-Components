@@ -1,6 +1,7 @@
 ﻿using D2P.Core.Components;
-using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Linq;
 
@@ -33,7 +34,7 @@ namespace D2P.GHPlugin.GH.Stream {
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            var componentTypes = Components.GetComponentTypes();
+            var componentTypes = _modelContext.Repository.GetComponentTypes();
 
             if (DA.Iteration == 0)
                 _properties = componentTypes.ToDictionary(compType => compType.TypeId, compType => typeof(ComponentType));

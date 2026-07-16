@@ -1,10 +1,12 @@
-﻿using Grasshopper.Kernel;
-using Rhino;
-using Rhino.UI;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
+using Grasshopper.Kernel;
+
+using Rhino;
+using Rhino.UI;
 
 namespace D2P.GHPlugin.GH {
     public abstract class GHComponentBase : GH_Component {

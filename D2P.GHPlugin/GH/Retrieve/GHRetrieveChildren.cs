@@ -1,6 +1,7 @@
 ﻿using D2P.Core.Interfaces;
-using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,9 @@ namespace D2P.GHPlugin.GH.Retrieve
                 return;
             }
 
-            var children = Components.GetChildComponents(component, filterTypes);
+            var repository = (component.Context ?? _modelContext).Repository;
+            repository.Attach(component);
+            var children = repository.GetChildren<IComponentBase>(component, filterTypes);
             if (children == null || !children.Any())
             {
                 var msg = $"ChildMembers of component {component.Name} not found !";

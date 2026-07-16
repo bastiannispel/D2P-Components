@@ -1,6 +1,9 @@
-﻿using Rhino.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
+
+using D2P.Core.Components;
+
+using Rhino.Geometry;
 
 namespace D2P.Core.Interfaces {
     public interface IComponentBase :
@@ -8,6 +11,9 @@ namespace D2P.Core.Interfaces {
         IComponentType,
         IDocObject<IComponentBase>,
         IComparable {
+
+        ModelContext Context { get; set; }
+        bool IsDirty { get; }
 
         IMember<TextEntity> Label { get; }
 
@@ -21,5 +27,7 @@ namespace D2P.Core.Interfaces {
 
         bool Transform(Transform xform);
         void Cache();
+        void Commit(bool deleteExisting, bool onlyDirty);
+        void MarkClean();
     }
 }

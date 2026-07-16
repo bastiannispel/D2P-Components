@@ -1,6 +1,7 @@
 ﻿using D2P.Core.Interfaces;
-using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,9 @@ namespace D2P.GHPlugin.GH.Retrieve
                 return;
             }
 
-            var joints = Components.GetJointComponents(component, filterTypes);
+            var repository = (component.Context ?? _modelContext).Repository;
+            repository.Attach(component);
+            var joints = repository.GetJoints<IComponentBase>(component, filterTypes);
             if (joints == null || !joints.Any())
             {
                 var msg = $"Joints of component {component.Name} not found !";

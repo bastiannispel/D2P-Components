@@ -1,6 +1,7 @@
 ﻿using D2P.Core.Interfaces;
-using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
+using Rhino;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,9 @@ namespace D2P.GHPlugin.GH.Retrieve {
                 return;
             }
 
-            var connectedComponents = Components.GetConnectedComponents(component, filterTypes);
+            var repository = (component.Context ?? _modelContext).Repository;
+            repository.Attach(component);
+            var connectedComponents = repository.GetConnected<IComponentBase>(component, filterTypes);
             if (connectedComponents == null || !connectedComponents.Any()) {
                 var msg = $"Connected components of component {component.Name} not found !";
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, msg);

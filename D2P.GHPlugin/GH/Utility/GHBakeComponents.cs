@@ -1,5 +1,8 @@
 ﻿using D2P.Core.Components;
+using D2P.Core.Interfaces;
+using D2P.Core.Repository;
 using D2P.Core.Utility;
+using D2P.GHPlugin;
 using Grasshopper.Kernel;
 using Rhino;
 using Rhino.DocObjects;
@@ -74,21 +77,27 @@ namespace D2P.GHPlugin.GH.Utility {
 
         void BakeComponents()
         {
-            RHDoc.UpdateComponentLayerColors(_components);
+            var doc = RhinoDoc.ActiveDoc;
+            var context = _modelContext;
+            var repository = context.Repository;
+            RHDoc.UpdateComponentLayerColors(doc, _components);
 
             foreach (var component in _components) {
                 if (component == null) continue;
 
-                // TODO: Refactoring Replacement Logic
-                var existingComponents = Instantiation.InstancesByName(component.Name);
-                foreach (var existing in existingComponents) {
-                    existing.Delete();
-                }
-                component.Commit(_replaceExisting);
+                repository.Attach(component);
+                var existingComponents = repository.GetByName<IComponentBase>(component.Name);
+                foreach (var existing in existingComponents)
+                    repository.Delete(existing);
+
+                repository.Save(component, new RepositoryOptions {
+                    DeleteExisting = _replaceExisting,
+                    OnlyDirty = false
+                });
             }
 
             if (_purgeEmptyLayers)
-                RHDoc.Purge(Settings.ActiveDoc);
+                RHDoc.Purge(doc);
         }
 
         /// <summary>

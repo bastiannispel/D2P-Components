@@ -5,10 +5,13 @@ using System.Windows.Forms;
 
 using D2P.Core;
 using D2P.Core.Interfaces;
+using D2P.GHPlugin;
 
 using Grasshopper;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
+
+using Rhino;
 
 namespace D2P.GHPlugin.GH.Stream {
     public class GHStreamComponentsByType : GHVariableParameterComponent {
@@ -49,15 +52,18 @@ namespace D2P.GHPlugin.GH.Stream {
             DA.GetDataList(0, componentTypes);
             DA.GetDataList(1, filterList);
 
+            var context = _modelContext;
+            var repository = context.Repository;
             var componentTrees = new Dictionary<string, DataTree<IComponentBase>>();
             foreach (var componentType in componentTypes) {
                 var typeID = (componentType?.Value as IComponentType)?.TypeId ?? componentType?.Value?.ToString();
                 if (typeID == null) continue;
                 _properties.Add(typeID, typeof(Enumerable));
                 componentTrees.Add(typeID, new DataTree<IComponentBase>());
+                D2PGHContext.RegisterType(RhinoDoc.ActiveDoc, typeID);
                 for (int i = 0; i < filterList.Count; i++) {
                     var filterOptions = new FilterOptions() { RegexPattern = filterList[i], ReversePattern = reverseRegex };
-                    var components = D2P.Core.Utility.Instantiation.InstancesByType(typeID, filterOptions);
+                    var components = repository.GetByType(typeID, filterOptions);
                     componentTrees[typeID].EnsurePath(i);
                     componentTrees[typeID].AddRange(components);
                     _components.AddRange(components); // only for visualization

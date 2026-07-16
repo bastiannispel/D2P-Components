@@ -1,4 +1,4 @@
-﻿using D2P.Core.Interfaces;
+using D2P.Core.Interfaces;
 using System.Collections.Generic;
 using System.Drawing;
 
