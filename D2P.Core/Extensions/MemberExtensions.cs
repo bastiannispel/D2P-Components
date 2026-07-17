@@ -1,24 +1,22 @@
-﻿using D2P.Core.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using D2P.Core.Interfaces;
 
 namespace D2P.Core.Extensions {
     public static class MemberExtensions {
-        public static IEnumerable<IMember> Duplicate(this IEnumerable<IMember> members)
-        {
+        public static IEnumerable<IMember> Duplicate(this IEnumerable<IMember> members) {
             foreach (var member in members) {
                 yield return member.Duplicate();
             }
         }
-        public static void SetComponent(this IEnumerable<IMember> members, IComponentBase component)
-        {
+        public static void SetComponent(this IEnumerable<IMember> members,IComponentBase component) {
             foreach (var member in members) {
                 member.Component = component;
                 member.AllMembers.SetComponent(component);
             }
         }
 
-        public static IEnumerable<IMember> Flatten(this IEnumerable<IMember> members)
-        {
+        public static IEnumerable<IMember> Flatten(this IEnumerable<IMember> members) {
             foreach (var member in members) {
                 yield return member;
 

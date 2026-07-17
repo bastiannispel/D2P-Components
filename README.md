@@ -5,7 +5,6 @@
 Ever struggled with structuring a model that is composed of a variety of different geometries and attributes that somehow still belong together ? 
 You usually end up with spaghetti code inside Grasshopper and go for a coffee break when you change an input parameter ? 
 
-
 Then it’s time to consider following a different modelling approach ! We want to share our best practices, acquired in 15 years of daily business and pioneering in defining parametric models with you and are excited about your approaches !
 In a nutshell this is what you can expect from D2P Components:
 -	Manage complex building components
@@ -15,7 +14,6 @@ In a nutshell this is what you can expect from D2P Components:
 -	Bake components to your Rhino model
 -	Build an entire component hierarchy
 -	Model parent-child and joint relations
-
 
 ## Installation
 There are two ways to install the plugin to your Rhino environment. Either by installing an existing release from either food4rhino or the package manager (user scenario)
@@ -31,7 +29,6 @@ You can install the plugin directly inside Rhino by the package server. Search f
 #### From SourceCode
 Please checkout the [Getting Involved](#getting-involved) section and follow the instructions for more informations about how to get started 
 
-
 ## Usage
 - Step 1 - D2P Components approach a different modelling style and workflow than you might be used to. They are based on specific concepts which are importatnt to understand before working with this plugin. 
 In order to get the basic understanding of the terminology and the concepts behind the code checkout the [D2PModellingGuideline](./D2PModellingGuideline.md)
@@ -45,7 +42,6 @@ For example in Version 1.1.1 there was a fix for "StreamComponentsByType" where 
 In order to fix it just delete the deprecated component and replace it manually with the new version.
 We try to avoid introducing these kind of breaking changes though sometimes it's necessary.
 For future releases there will be potentially an upgrade assistant helping you to automate the migration.
-
 
 ## Getting Help
 - Whenever you have questions about the plugin, its usage or conceptual topics you can search in the [Discussion](https://github.com/design-to-production/D2P-Components/discussions) forum of this repository.

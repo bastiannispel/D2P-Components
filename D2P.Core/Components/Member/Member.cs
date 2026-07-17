@@ -1,12 +1,14 @@
-﻿using D2P.Core.Components.Primitives;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+
+using D2P.Core.Components.Primitives;
 using D2P.Core.Extensions;
 using D2P.Core.Interfaces;
 using D2P.Core.Utility;
+
 using Rhino.DocObjects;
 using Rhino.Geometry;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace D2P.Core.Components.Member {
     public class Member<T> : Member, IMember<T> where T : GeometryBase {
@@ -20,14 +22,14 @@ namespace D2P.Core.Components.Member {
                 var typedObjects = baseObjects.OfType<IBaseObject<T>>();
                 var untypedObjects = baseObjects
                      .Where(o => o.Geometry is T && !(o is IBaseObject<T>))
-                     .Select(o => new BaseObject<T>((T)o.Geometry, o.Attributes));
+                     .Select(o => new BaseObject<T>((T)o.Geometry,o.Attributes));
                 return typedObjects.Concat(untypedObjects);
             }
             set => base.BaseObjects = value.Cast<IBaseObject>();
         }
 
-        public Member(IComponentBase component, ILayerInfo layerInfo) : base(component, layerInfo) { }
-        public Member(IComponentBase component, string rawLayerName, Color layerColor) : base(component, rawLayerName, layerColor) { }
+        public Member(IComponentBase component,ILayerInfo layerInfo) : base(component,layerInfo) { }
+        public Member(IComponentBase component,string rawLayerName,Color layerColor) : base(component,rawLayerName,layerColor) { }
         protected Member(IMember<T> other) : base(other) { }
 
         void IMember<T>.SetObject(IBaseObject<T> baseObject) => base.SetObject(baseObject);
@@ -42,6 +44,7 @@ namespace D2P.Core.Components.Member {
         protected IEnumerable<IBaseObject> _objects;
 
         public IComponentBase Component { get; set; }
+        public bool IsDirty { get; private set; }
 
         public ILayerInfo LayerInfo { get; set; }
         public IEnumerable<ObjectAttributes> Attributes => BaseObjects.Select(o => o.Attributes);
@@ -53,24 +56,26 @@ namespace D2P.Core.Components.Member {
             get {
                 if (_objects != null)
                     return _objects;
-                var layer = Layers.FindLayer(this);
+                var doc = DocHelper.Require(this);
+                var layer = Layers.FindLayer(doc,this);
                 if (layer == null)
                     return _objects = Enumerable.Empty<IBaseObject>();
-                return _objects = Objects.ObjectsByLayer(Component, layer.Index)
+                return _objects = Objects.ObjectsByLayer(doc,Component,layer.Index)
                    .Select(obj => new BaseObject(obj))
                    .ToList();
             }
-            set => _objects = value;
+            set {
+                _objects = value;
+                MarkDirty();
+            }
         }
-        public Member(IComponentBase component, ILayerInfo layerInfo)
-        {
+        public Member(IComponentBase component,ILayerInfo layerInfo) {
             Component = component;
             LayerInfo = layerInfo;
         }
-        public Member(IComponentBase component, string rawLayerName, Color layerColor)
-            : this(component, new LayerInfo(rawLayerName, layerColor)) { }
-        protected Member(IMember other)
-        {
+        public Member(IComponentBase component,string rawLayerName,Color layerColor)
+            : this(component,new LayerInfo(rawLayerName,layerColor)) { }
+        protected Member(IMember other) {
             ParentMember = other.ParentMember;
             Component = other.Component;
             LayerInfo = other.LayerInfo;
@@ -78,39 +83,57 @@ namespace D2P.Core.Components.Member {
             DynamicMembers = other.DynamicMembers.Duplicate();
         }
 
-        public void SetObject(IBaseObject obj) => _objects = new[] { obj };
-        public void SetObjects(IEnumerable<IBaseObject> objects) => _objects = objects;
-        public void SetObject(GeometryBase geometry) => _objects = new[] { new BaseObject(geometry) };
-        public void SetObjects(IEnumerable<GeometryBase> geometry) => _objects = geometry.Select(g => new BaseObject(g)).ToList();
-        void IMember.SetObject(IBaseObject baseObject) => _objects = new[] { baseObject };
-        void IMember.SetObjects(IEnumerable<IBaseObject> baseObjects) => _objects = baseObjects;
+        public void SetObject(IBaseObject obj) {
+            _objects = new[] { obj };
+            MarkDirty();
+        }
+        public void SetObjects(IEnumerable<IBaseObject> objects) {
+            _objects = objects;
+            MarkDirty();
+        }
+        public void SetObject(GeometryBase geometry) {
+            _objects = new[] { new BaseObject(geometry) };
+            MarkDirty();
+        }
+        public void SetObjects(IEnumerable<GeometryBase> geometry) {
+            _objects = geometry.Select(g => new BaseObject(g)).ToList();
+            MarkDirty();
+        }
+        void IMember.SetObject(IBaseObject baseObject) => SetObject(baseObject);
+        void IMember.SetObjects(IEnumerable<IBaseObject> baseObjects) => SetObjects(baseObjects);
 
-
-        public override void SetMember(IMember member)
-        {
+        public override void SetMember(IMember member) {
             member.ParentMember = this;
             base.SetMember(member);
+            MarkDirty();
         }
 
-        public void Commit(bool deleteExisting)
-        {
+        public void Commit(bool deleteExisting) {
+            Commit(deleteExisting,false);
+        }
+
+        public void Commit(bool deleteExisting,bool onlyDirty) {
             if (Component == null || !Component.Exists())
                 return;
 
-            UpdateDoc();
+            if (!onlyDirty || IsDirty)
+                UpdateDoc();
 
             foreach (var childMember in AllMembers) {
                 childMember.ParentMember = this;
                 childMember.Component = Component;
-                childMember.Commit(deleteExisting);
+                childMember.Commit(deleteExisting,onlyDirty);
             }
+
+            MarkClean();
         }
-        private void UpdateDoc()
-        {
-            var memberLayer = Layers.CreateLayer(this);
+
+        void UpdateDoc() {
+            var doc = DocHelper.Require(this);
+            var memberLayer = Layers.CreateLayer(doc,this);
 
             if (_objects == null) return;
-            else Delete();
+            Delete();
 
             foreach (var obj in BaseObjects) {
                 obj.Attributes.RemoveFromAllGroups();
@@ -119,26 +142,28 @@ namespace D2P.Core.Components.Member {
                 obj.Attributes.LayerIndex = memberLayer.Index;
 
                 if (obj.Geometry == null) continue;
-                var id = Settings.ActiveDoc.Objects.Add(obj.Geometry, obj.Attributes);
+                var id = doc.Objects.Add(obj.Geometry,obj.Attributes);
                 obj.Attributes.ObjectId = id;
             }
         }
 
-        public bool Exists() { return Geometry.Any(); }
-        public void Delete()
-        {
-            var layer = Layers.FindLayer(this);
-            Objects.DeleteObjects(Component, layer, true);
-            foreach (var member in AllMembers) {
+        public bool Exists() => Geometry.Any();
+        public void Delete() {
+            var doc = DocHelper.Require(this);
+            var layer = Layers.FindLayer(doc,this);
+            Objects.DeleteObjects(doc,Component,layer,true);
+            foreach (var member in AllMembers)
                 member.Delete();
-            }
         }
 
-        public IMember Duplicate()
-        {
-            return new Member(this);
+        public IMember Duplicate() => new Member(this);
+
+        public void MarkClean() => IsDirty = false;
+
+        void MarkDirty() {
+            IsDirty = true;
+            if (Component is ComponentBase componentBase)
+                componentBase.MarkDirty();
         }
-
-
     }
 }

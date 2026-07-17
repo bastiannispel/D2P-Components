@@ -1,13 +1,12 @@
-﻿using D2P.Core.Interfaces;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
+using D2P.Core.Interfaces;
+using D2P.Core.Repository;
 
 namespace D2P.Core.Extensions {
     public static class ComponentExtensions {
-        public static void Commit(this IEnumerable<IComponentBase> components)
-        {
-            foreach (var comp in components) {
-                comp.Commit(true);
-            }
+        public static void Save(this IEnumerable<IComponentBase> components,IComponentRepository repository,RepositoryOptions? options = null) {
+            repository.SaveMany(components,options);
         }
     }
 }

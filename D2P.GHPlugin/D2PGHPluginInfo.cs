@@ -1,6 +1,7 @@
-﻿using Grasshopper.Kernel;
-using System;
+﻿using System;
 using System.Drawing;
+
+using Grasshopper.Kernel;
 
 namespace D2P.GHPlugin {
     public class D2PGHPluginInfo : GH_AssemblyInfo {
@@ -21,7 +22,6 @@ namespace D2P.GHPlugin {
         //Return a string representing your preferred contact details.
         public override string AuthorContact => "components@designtoproduction.com";
 
-        public D2PGHPluginInfo()
-        { }
+        public D2PGHPluginInfo() { }
     }
 }

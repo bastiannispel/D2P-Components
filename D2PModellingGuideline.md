@@ -74,4 +74,3 @@
 - If the same ```component-instances``` are connected by multiple joints, the joint names are distinguished by a ```joint-count```
   - Multiple joints for the above parts would be "aa.01+bb.02#1", "aa.01+bb02#2", "aa.01+bb02#3" etc.
 
-

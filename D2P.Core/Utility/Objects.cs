@@ -5,134 +5,102 @@ using System.Linq;
 using D2P.Core.Components;
 using D2P.Core.Interfaces;
 
+using Rhino;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 
 namespace D2P.Core.Utility {
     public static class Objects {
-        // Get Type Infos
-        public static ComponentType GetComponentTypeFromObject(RhinoObject rhObj)
-        {
-            var typeLayer = Layers.FindComponentTypeRootLayer(rhObj);
+        public static ComponentType GetComponentTypeFromObject(RhinoDoc doc,RhinoObject rhObj) {
+            var typeLayer = Layers.FindComponentTypeRootLayer(doc,rhObj);
             var typeID = rhObj.Name.Split(Settings.TypeDelimiter).FirstOrDefault();
             var typeName = Layers.GetComponentTypeName(typeLayer);
-            var labelSize = Layers.GetComponentTypeLabelSize(typeLayer);
-            var layerColor = Layers.FindComponentTypeRootLayer(rhObj)?.Color;
-            return new ComponentType(typeID, typeName, labelSize, layerColor);
+            var labelSize = Layers.GetComponentTypeLabelSize(doc,typeLayer);
+            var layerColor = Layers.FindComponentTypeRootLayer(doc,rhObj)?.Color;
+            return new ComponentType(typeID,typeName,labelSize,layerColor);
         }
 
-        // Objects By Name
-        public static IEnumerable<RhinoObject> ObjectsByName(string name, ObjectType objectTypeFilter)
-        {
-            var objEnumSettings = Constants.ObjectEnumeratorSettings(name, objectTypeFilter);
-            return Settings.ActiveDoc.Objects.GetObjectList(objEnumSettings);
+        public static IEnumerable<RhinoObject> ObjectsByName(RhinoDoc doc,string name,ObjectType objectTypeFilter) {
+            var objEnumSettings = Constants.ObjectEnumeratorSettings(name,objectTypeFilter);
+            return doc.Objects.GetObjectList(objEnumSettings);
         }
 
-        // Objects By Layer
-        public static IEnumerable<RhinoObject> ObjectsByLayer(IComponentBase component, int layerIdx)
-        {
-            return ObjectsByGroup(component.GroupIndex)
+        public static IEnumerable<RhinoObject> ObjectsByLayer(RhinoDoc doc,IComponentBase component,int layerIdx) {
+            return ObjectsByGroup(doc,component.GroupIndex)
                 .Where(rh => rh.Attributes.LayerIndex == layerIdx);
         }
-        public static IEnumerable<RhinoObject> ObjectsByLayer(Layer layer)
-        {
-            return Settings.ActiveDoc.Objects.FindByLayer(layer);
+
+        public static IEnumerable<RhinoObject> ObjectsByLayer(RhinoDoc doc,Layer layer) {
+            return doc.Objects.FindByLayer(layer);
         }
 
-        // Geometry By Layer
-        public static IEnumerable<T> GeometryByLayer<T>(IComponentBase component, int layerIdx) where T : GeometryBase
-        {
-            return ObjectsByLayer(component, layerIdx)
+        public static IEnumerable<T> GeometryByLayer<T>(RhinoDoc doc,IComponentBase component,int layerIdx) where T : GeometryBase {
+            return ObjectsByLayer(doc,component,layerIdx)
                 .Select(rhObj => rhObj.Geometry)
                 .OfType<T>();
         }
-        public static IEnumerable<GeometryBase> GeometryByLayer(IComponentBase component, int layerIdx)
-        {
-            return GeometryByLayer<GeometryBase>(component, layerIdx);
+
+        public static IEnumerable<GeometryBase> GeometryByLayer(RhinoDoc doc,IComponentBase component,int layerIdx) {
+            return GeometryByLayer<GeometryBase>(doc,component,layerIdx);
         }
-        //public static IEnumerable<T> GeometryByLayer<T>(IEnumerable<IMember> members, int layerIdx) where T : GeometryBase
-        //{
-        //    // TODO: Refactor and make SURE that components without initialized members return objects !!
-        //    return members
-        //        .FirstOrDefault(m => m.Attributes.LayerIndex == layerIdx)
-        //        .Geometry
-        //        .OfType<T>();
-        //}
-        //public static IEnumerable<GeometryBase> GeometryByLayer(IEnumerable<IMember> members, int layerIdx)
-        //{
-        //    return GeometryByLayer<GeometryBase>(members, layerIdx);
-        //}
 
+        public static IEnumerable<RhinoObject> ObjectsByGroup(RhinoDoc doc,int grpIdx) {
+            return doc.Groups.GroupMembers(grpIdx);
+        }
 
-        // Objects By Group
-        public static IEnumerable<RhinoObject> ObjectsByGroup(int grpIdx) => Settings.ActiveDoc.Groups.GroupMembers(grpIdx);
-
-
-        // Delete Objects
-        public static int DeleteObjects(IComponentBase component, Layer layer, bool recursive = false)
-        {
-            //TODO: Handle layer == null
+        public static int DeleteObjects(RhinoDoc doc,IComponentBase component,Layer layer,bool recursive = false) {
             if (component == null || layer == null)
                 return 0;
-            if (!Group.GetGroupIndex(component, out int grpIdx))
+            if (!Group.GetGroupIndex(doc,component,out int grpIdx))
                 return 0;
-            var rhObjects = ObjectsByLayer(component, layer.Index);
+            var rhObjects = ObjectsByLayer(doc,component,layer.Index);
             if (rhObjects == null)
                 return 0;
             var objectIds = rhObjects.Select(rh => rh.Id);
-            var nDeleted = Settings.ActiveDoc.Objects.Delete(objectIds, true);
+            var nDeleted = doc.Objects.Delete(objectIds,true);
 
             if (recursive) {
-                var sublayers = Layers.GetChildLayers(layer);
-                foreach (var sublayer in sublayers) {
-                    nDeleted += DeleteObjects(component, sublayer, recursive);
-                }
+                var sublayers = Layers.GetChildLayers(doc,layer);
+                foreach (var sublayer in sublayers)
+                    nDeleted += DeleteObjects(doc,component,sublayer,recursive);
             }
 
             return nDeleted;
         }
 
-        public static int DeleteObjects(IMember member)
-        {
-            var layer = Layers.FindLayer(member);
-            return DeleteObjects(member.Component, layer);
+        public static int DeleteObjects(RhinoDoc doc,IMember member) {
+            var layer = Layers.FindLayer(doc,member);
+            return DeleteObjects(doc,member.Component,layer);
         }
 
-
-        // Delete Components
-        public static int DeleteComponent(IComponentBase component)
-        {
-            if (!Group.GetGroupIndex(component, out int grpIdx)) return -1;
-            var objectIds = ObjectsByGroup(grpIdx).Select(rh => rh.Id);
-            return Settings.ActiveDoc.Objects.Delete(objectIds, true);
-        }
-        public static int DeleteComponents(IEnumerable<IComponentBase> components)
-        {
-            return components.Sum(comp => DeleteComponent(comp));
+        public static int DeleteComponent(RhinoDoc doc,IComponentBase component) {
+            if (!Group.GetGroupIndex(doc,component,out int grpIdx)) return -1;
+            var objectIds = ObjectsByGroup(doc,grpIdx).Select(rh => rh.Id);
+            return doc.Objects.Delete(objectIds,true);
         }
 
-        // Add Objects        
-        public static void AddObjects(IMember member)
-        {
-            var layer = Layers.FindLayer(member);
+        public static int DeleteComponents(RhinoDoc doc,IEnumerable<IComponentBase> components) {
+            return components.Sum(comp => DeleteComponent(doc,comp));
         }
 
-        // Get Object Group IDs
-        public static int GetObjectGroupID(Guid objectID)
-        {
-            var rhinoObject = Settings.ActiveDoc.Objects.Find(objectID);
+        public static void AddObjects(RhinoDoc doc,IMember member) {
+            Layers.FindLayer(doc,member);
+        }
+
+        public static int GetObjectGroupID(RhinoDoc doc,Guid objectID) {
+            var rhinoObject = doc.Objects.Find(objectID);
             if (rhinoObject.GroupCount < 1) { return -1; }
             if (rhinoObject.GroupCount > 1) { return -2; }
             return rhinoObject.GetGroupList()[0];
         }
-        public static IEnumerable<int> GetObjectGroupIDs(Guid objectID)
-        {
-            var rhinoObject = Settings.ActiveDoc.Objects.Find(objectID);
+
+        public static IEnumerable<int> GetObjectGroupIDs(RhinoDoc doc,Guid objectID) {
+            var rhinoObject = doc.Objects.Find(objectID);
             if (rhinoObject == null || rhinoObject.GroupCount < 1) return new List<int>();
             return rhinoObject.GetGroupList();
         }
-        public static IEnumerable<int> GetObjectGroupIDs(RhinoObject rhinoObject)
-        {
+
+        public static IEnumerable<int> GetObjectGroupIDs(RhinoDoc doc,RhinoObject rhinoObject) {
             if (rhinoObject == null || rhinoObject.GroupCount < 1) return new List<int>();
             return rhinoObject.GetGroupList();
         }

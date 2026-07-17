@@ -87,7 +87,6 @@
     
     <Delete Files="@(YakPackagesToDelete)" />
     <Copy SourceFiles="Assets/Logo.png;manifest.yml" DestinationFolder="$(OutputPath)net48/" />
-    
 
 	<!-- Rhino 7 -->    	  
     <Exec Command="&quot;$(YakExecutable)&quot; build --platform=win" WorkingDirectory="$(OutputPath)net48\" Condition="$(BuildYakPackage) == 'True'" />

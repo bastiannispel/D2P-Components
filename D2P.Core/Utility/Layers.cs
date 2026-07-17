@@ -1,19 +1,20 @@
-﻿using D2P.Core.Components;
-using D2P.Core.Interfaces;
-using Rhino.DocObjects;
-using Rhino.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using D2P.Core.Components;
+using D2P.Core.Interfaces;
+
+using Rhino;
+using Rhino.DocObjects;
+using Rhino.Geometry;
+
 namespace D2P.Core.Utility {
     public static class Layers {
-        // Create Layer
-        public static Layer CreateLayer(IComponentBase component)
-        {
-            if (!FindRootLayer(out Layer rootLayer))
-                rootLayer = CreateRootLayer();
+        public static Layer CreateLayer(RhinoDoc doc,IComponentBase component) {
+            if (!FindRootLayer(doc,out Layer rootLayer))
+                rootLayer = CreateRootLayer(doc);
             var layerName = ComposeComponentTypeLayerName(component);
             var componentLayer = new Layer() {
                 Id = Guid.NewGuid(),
@@ -21,36 +22,36 @@ namespace D2P.Core.Utility {
                 Name = layerName,
                 Color = component.LayerColor
             };
-            var layerIdx = Settings.ActiveDoc.Layers.Add(componentLayer);
+            var layerIdx = doc.Layers.Add(componentLayer);
             componentLayer.Index = layerIdx;
             return componentLayer;
         }
-        public static Layer CreateLayer(IMember member)
-        {
+
+        public static Layer CreateLayer(RhinoDoc doc,IMember member) {
             var layerName = ComposeMemberLayerName(member);
             var layerSegments = new Queue<string>(layerName
                 .Split(Settings.LayerNameDelimiter)
                 .Where(s => !string.IsNullOrEmpty(s))
             );
 
-            var componentLayer = FindComponentTypeRootLayer(member.Component);
+            var componentLayer = FindComponentTypeRootLayer(doc,member.Component);
             if (componentLayer == null || componentLayer.Index == 0)
-                componentLayer = CreateComponentTypeLayer(member.Component);
+                componentLayer = CreateComponentTypeLayer(doc,member.Component);
 
-            return TraverseLayers(member, ref layerSegments, componentLayer.Id);
+            return TraverseLayers(doc,member,ref layerSegments,componentLayer.Id);
         }
-        public static Layer CreateRootLayer()
-        {
-            if (!FindRootLayer(out Layer rootLayer)) {
-                var rootLayerIdx = Settings.ActiveDoc.Layers.Add(Settings.RootLayerName, Settings.RootLayerColor);
-                rootLayer = Settings.ActiveDoc.Layers.FindIndex(rootLayerIdx);
+
+        public static Layer CreateRootLayer(RhinoDoc doc) {
+            if (!FindRootLayer(doc,out Layer rootLayer)) {
+                var rootLayerIdx = doc.Layers.Add(Settings.RootLayerName,Settings.RootLayerColor);
+                rootLayer = doc.Layers.FindIndex(rootLayerIdx);
             }
             return rootLayer;
         }
-        public static Layer CreateComponentTypeLayer(IComponentBase component)
-        {
-            if (!FindRootLayer(out Layer rootLayer))
-                rootLayer = CreateRootLayer();
+
+        public static Layer CreateComponentTypeLayer(RhinoDoc doc,IComponentBase component) {
+            if (!FindRootLayer(doc,out Layer rootLayer))
+                rootLayer = CreateRootLayer(doc);
             var layerName = ComposeComponentTypeLayerName(component);
             var componentLayer = new Layer() {
                 Id = Guid.NewGuid(),
@@ -58,122 +59,110 @@ namespace D2P.Core.Utility {
                 Name = layerName,
                 Color = component.LayerColor
             };
-            var layerIdx = Settings.ActiveDoc.Layers.Add(componentLayer);
+            var layerIdx = doc.Layers.Add(componentLayer);
             componentLayer.Index = layerIdx;
             return componentLayer;
         }
 
-        // Find Layers
-        public static bool FindRootLayer(out Layer rootLayer)
-        {
-            rootLayer = FindLayerByName(Settings.RootLayerName);
+        public static bool FindRootLayer(RhinoDoc doc,out Layer rootLayer) {
+            rootLayer = FindLayerByName(doc,Settings.RootLayerName);
             return rootLayer != null;
         }
 
-        public static Layer FindLayer(IMember member)
-        {
-            var layer = FindLayer(member, out int layersFound);
+        public static Layer FindLayer(RhinoDoc doc,IMember member) {
+            var layer = FindLayer(doc,member,out int layersFound);
             return layersFound != 1 ? null : layer;
         }
-        public static Layer FindLayer(IMember member, out int layersFound)
-        {
+
+        public static Layer FindLayer(RhinoDoc doc,IMember member,out int layersFound) {
             if (member?.Component == null) {
                 layersFound = 0;
                 return null;
             }
-            string layerName = string.Empty;
+            string layerName;
             if (string.IsNullOrEmpty(member.LayerInfo.RawLayerName))
-                layerName = ComposeComponentTypeLayerName(member?.Component);
-            else layerName = ComposeFullLayerPath(member);
-            var componentLayers = GetComponentLayers(member.Component);
+                layerName = ComposeComponentTypeLayerName(member.Component);
+            else
+                layerName = ComposeFullLayerPath(doc,member);
+            var componentLayers = GetComponentLayers(doc,member.Component);
             var matchedLayers = componentLayers
-                .Where(l => !l.IsReference && l.FullPath == layerName) // TODO: Compare FULL LayerName !!!
+                .Where(l => !l.IsReference && l.FullPath == layerName)
                 .ToList();
             layersFound = matchedLayers.Count;
             return layersFound == 1 ? matchedLayers[0] : null;
         }
-        public static Layer FindLayer(int layerIndex)
-        {
-            return Settings.ActiveDoc.Layers.FindIndex(layerIndex);
+
+        public static Layer FindLayer(RhinoDoc doc,int layerIndex) {
+            return doc.Layers.FindIndex(layerIndex);
         }
-        public static Layer FindComponentLayerByType(string type)
-        {
-            var layerNames = Settings.ActiveDoc.Layers.Where(l => !l.IsReference).Select(l => l.Name);
-            var componentLayerName = ComposeComponentTypeLayerName(type, "");
+
+        public static Layer FindComponentLayerByType(RhinoDoc doc,string type) {
+            var layerNames = doc.Layers.Where(l => !l.IsReference).Select(l => l.Name);
+            var componentLayerName = ComposeComponentTypeLayerName(type,"");
             componentLayerName = layerNames.FirstOrDefault(name => name.StartsWith(componentLayerName));
             if (componentLayerName == null)
                 return null;
-            return FindLayerByName(componentLayerName);
+            return FindLayerByName(doc,componentLayerName);
         }
-        public static Layer FindLayerByName(string layerName, bool includeReferenced = false)
-        {
+
+        public static Layer FindLayerByName(RhinoDoc doc,string layerName,bool includeReferenced = false) {
             bool condition(Layer layer) => includeReferenced || !layer.IsReference;
-            var layerFound = Settings.ActiveDoc.Layers
+            var layerFound = doc.Layers
                 .FirstOrDefault(l => condition(l) &&
                 l.Name == layerName &&
                 l.FullPath.StartsWith(Settings.RootLayerName));
-            if (layerFound == null)
-                return null;
             return layerFound;
         }
 
-        public static IEnumerable<Layer> FindComponentTypeRootLayers()
-        {
-            if (!FindRootLayer(out Layer rootLayer))
+        public static IEnumerable<Layer> FindComponentTypeRootLayers(RhinoDoc doc) {
+            if (!FindRootLayer(doc,out Layer rootLayer))
                 return Enumerable.Empty<Layer>();
-            var childLayers = GetChildLayers(rootLayer);
+            var childLayers = GetChildLayers(doc,rootLayer);
             return childLayers.Where(layer => IsComponentTypeRootLayer(layer));
         }
-        public static Layer FindComponentTypeRootLayer(RhinoObject obj)
-        {
-            var objLayer = FindLayer(obj.Attributes.LayerIndex);
+
+        public static Layer FindComponentTypeRootLayer(RhinoDoc doc,RhinoObject obj) {
+            var objLayer = FindLayer(doc,obj.Attributes.LayerIndex);
             if (IsComponentTypeRootLayer(objLayer))
                 return objLayer;
 
             var componentTypeAncestorLayers = new List<Layer>();
-            TraverseAncestorLayers(objLayer.Id, ref componentTypeAncestorLayers);
-
+            TraverseAncestorLayers(doc,objLayer.Id,ref componentTypeAncestorLayers);
             return componentTypeAncestorLayers.Find(l => IsComponentTypeRootLayer(l));
         }
-        public static Layer FindComponentTypeRootLayer(IComponentBase component)
-        {
+
+        public static Layer FindComponentTypeRootLayer(RhinoDoc doc,IComponentBase component) {
             var componentTypeRootLayerName = ComposeComponentTypeLayerName(component);
-            return FindLayerByName(componentTypeRootLayerName);
+            return FindLayerByName(doc,componentTypeRootLayerName);
         }
 
-        // Layer Validation
-        public static bool IsComponentTypeRootLayer(IComponentBase component, string layerName)
-        {
+        public static bool IsComponentTypeRootLayer(IComponentBase component,string layerName) {
             return layerName.Split(Settings.LayerDescriptionDelimiter).FirstOrDefault() == component.TypeId;
         }
-        public static bool IsComponentTypeRootLayer(Layer layer)
-        {
+
+        public static bool IsComponentTypeRootLayer(Layer layer) {
             if (layer == null)
                 return false;
             var regex = new Regex($".*(?<!/s){Settings.LayerDescriptionDelimiter}(?<!/s).*");
             return regex.IsMatch(layer.Name);
         }
 
-        // Compose Layer Names
-        public static string ComposeComponentLayerName(IComponentBase component, string rawLayerName)
-        {
+        public static string ComposeComponentLayerName(IComponentBase component,string rawLayerName) {
             return $"{component.TypeId}{Settings.LayerDelimiter}{rawLayerName.Split(Settings.LayerNameDelimiter).LastOrDefault()}";
         }
 
-        public static string ComposeComponentTypeLayerName(IComponentType componentType)
-        {
-            return ComposeComponentTypeLayerName(componentType.TypeId, componentType.TypeName);
+        public static string ComposeComponentTypeLayerName(IComponentType componentType) {
+            return ComposeComponentTypeLayerName(componentType.TypeId,componentType.TypeName);
         }
-        public static string ComposeComponentTypeLayerName(string type, string description)
-        {
+
+        public static string ComposeComponentTypeLayerName(string type,string description) {
             return $"{type} {Settings.LayerDescriptionDelimiter} {description}";
         }
 
-        public static string ComposeFullLayerPath(IMember member)
-        {
+        public static string ComposeFullLayerPath(RhinoDoc doc,IMember member) {
             var layerPath = string.Empty;
-            composeLayerPath(member, ref layerPath);
-            var typeLayer = FindComponentTypeRootLayer(member.Component);
+            composeLayerPath(member,ref layerPath);
+            var typeLayer = FindComponentTypeRootLayer(doc,member.Component);
             var typeLayerName = typeLayer?.FullPath;
             if (typeLayer == null) {
                 var composedTypeLayerName = ComposeComponentTypeLayerName(member.Component);
@@ -181,33 +170,30 @@ namespace D2P.Core.Utility {
             }
             return $"{typeLayerName}::{layerPath}";
         }
-        static void composeLayerPath(IMember member, ref string layerPath)
-        {
+
+        static void composeLayerPath(IMember member,ref string layerPath) {
             var layerNames = member.LayerInfo.RawLayerName.Split(':')
                 .Where(name => !string.IsNullOrEmpty(name))
-                .Select(name => name.Replace($"{member.Component.TypeId}{Settings.LayerDelimiter}", ""))
+                .Select(name => name.Replace($"{member.Component.TypeId}{Settings.LayerDelimiter}",""))
                 .Select(name => $"{member.Component.TypeId}{Settings.LayerDelimiter}{name}");
-            var result = string.Join("::", layerNames);
+            var result = string.Join("::",layerNames);
 
-            layerPath = layerPath.Insert(0, result);
+            layerPath = layerPath.Insert(0,result);
             if (member.ParentMember == null)
                 return;
-            layerPath = layerPath.Insert(0, "::");
-            composeLayerPath(member.ParentMember, ref layerPath);
+            layerPath = layerPath.Insert(0,"::");
+            composeLayerPath(member.ParentMember,ref layerPath);
         }
 
-        public static string DecomposeLayerName(IComponentBase component, string layerName)
-        {
-            if (IsComponentTypeRootLayer(component, layerName)) {
+        public static string DecomposeLayerName(IComponentBase component,string layerName) {
+            if (IsComponentTypeRootLayer(component,layerName)) {
                 var idx = layerName.IndexOf(Settings.LayerDescriptionDelimiter);
                 return layerName.Substring(idx);
             }
             return layerName.Substring(layerName.IndexOf(Settings.LayerDelimiter));
         }
 
-        //DROP !!
-        public static string ComposeMemberLayerName(IMember member)
-        {
+        public static string ComposeMemberLayerName(IMember member) {
             if (member == null)
                 return string.Empty;
 
@@ -223,94 +209,86 @@ namespace D2P.Core.Utility {
             return $"{parentLayerName}{layerDelimiter}{layerDelimiter}{layerName}";
         }
 
-        // Get Layer Infos
-        public static LayerInfo GetLayerInfo(Layer layer)
-        {
-            return new LayerInfo(GetRawLayerName(layer), layer.Color);
+        public static LayerInfo GetLayerInfo(Layer layer) {
+            return new LayerInfo(GetRawLayerName(layer),layer.Color);
         }
-        public static string GetRawLayerName(Layer layer)
-        {
+
+        public static string GetRawLayerName(Layer layer) {
             return layer.Name.Split(Settings.LayerDelimiter).LastOrDefault();
         }
 
-        // Get Component Infos
-        public static string GetComponentTypeID(Layer layer)
-        {
+        public static string GetComponentTypeID(Layer layer) {
             if (!IsComponentTypeRootLayer(layer))
                 return string.Empty;
             var substringStartIdx = layer.Name.IndexOf(Settings.LayerDescriptionDelimiter);
-            return layer.Name.Substring(0, substringStartIdx - 1);
+            return layer.Name.Substring(0,substringStartIdx - 1);
         }
-        public static string GetComponentTypeName(Layer layer)
-        {
+
+        public static string GetComponentTypeName(Layer layer) {
             if (!IsComponentTypeRootLayer(layer))
                 return string.Empty;
             var substringStartIdx = layer.Name.IndexOf(Settings.LayerDescriptionDelimiter);
             return layer.Name.Substring(substringStartIdx + 2);
         }
-        public static string GetComponentTypeName(RhinoObject rhObj)
-        {
-            var layer = FindComponentTypeRootLayer(rhObj);
+
+        public static string GetComponentTypeName(RhinoDoc doc,RhinoObject rhObj) {
+            var layer = FindComponentTypeRootLayer(doc,rhObj);
             return GetComponentTypeName(layer);
         }
-        public static double GetComponentTypeLabelSize(Layer componentLayer)
-        {
-            var compObj = Objects.ObjectsByLayer(componentLayer).FirstOrDefault();
-            if (IsComponentTypeRootLayer(componentLayer) && compObj?.Geometry is TextEntity)
-                return (compObj.Geometry as TextEntity).TextHeight;
-            return Settings.DimensionStyle.TextHeight;
+
+        public static double GetComponentTypeLabelSize(RhinoDoc doc,Layer componentLayer) {
+            var compObj = Objects.ObjectsByLayer(doc,componentLayer).FirstOrDefault();
+            if (IsComponentTypeRootLayer(componentLayer) && compObj?.Geometry is TextEntity textEntity)
+                return textEntity.TextHeight;
+            return Settings.GetDimensionStyle(doc).TextHeight;
         }
 
-        // Get Layers
-        public static IEnumerable<Layer> GetComponentLayers(IComponentBase component)
-        {
+        public static IEnumerable<Layer> GetComponentLayers(RhinoDoc doc,IComponentBase component) {
             var componentLayers = new List<Layer>();
-            var componentTypeRootLayer = FindComponentTypeRootLayer(component);
+            var componentTypeRootLayer = FindComponentTypeRootLayer(doc,component);
             if (componentTypeRootLayer == null)
                 return componentLayers;
-            TraverseChildLayers(componentTypeRootLayer.Id, ref componentLayers);
+            TraverseChildLayers(doc,componentTypeRootLayer.Id,ref componentLayers);
             return componentLayers;
         }
-        public static IEnumerable<Layer> GetAncestorLayers(Layer layer, bool includeRoot = false)
-        {
+
+        public static IEnumerable<Layer> GetAncestorLayers(RhinoDoc doc,Layer layer,bool includeRoot = false) {
             var parentId = layer.ParentLayerId;
             var ancestorLayers = new List<Layer>();
             if (includeRoot)
                 ancestorLayers.Add(layer);
-            TraverseAncestorLayers(parentId, ref ancestorLayers);
+            TraverseAncestorLayers(doc,parentId,ref ancestorLayers);
             return ancestorLayers;
         }
-        public static IEnumerable<Layer> GetChildLayers(Layer layer)
-        {
+
+        public static IEnumerable<Layer> GetChildLayers(RhinoDoc doc,Layer layer) {
             var rootId = layer?.Id ?? Guid.Empty;
             if (rootId == Guid.Empty)
                 return Enumerable.Empty<Layer>();
             var childLayers = new List<Layer>();
-            TraverseChildLayers(rootId, ref childLayers);
+            TraverseChildLayers(doc,rootId,ref childLayers);
             return childLayers.Where(l => l.Id != rootId);
         }
-        public static IEnumerable<Layer> GetChildLayers(int layerIdx)
-        {
-            return GetChildLayers(Settings.ActiveDoc.Layers.FindIndex(layerIdx));
-        }
-        public static IEnumerable<int> GetChildLayerIndices(int layerIdx)
-        {
-            return GetChildLayers(layerIdx).Select(layer => layer.Index);
+
+        public static IEnumerable<Layer> GetChildLayers(RhinoDoc doc,int layerIdx) {
+            return GetChildLayers(doc,doc.Layers.FindIndex(layerIdx));
         }
 
-        // Traverse Layers
-        static Layer TraverseLayers(IMember member, ref Queue<string> layerQueue, Guid parentLayerId)
-        {
+        public static IEnumerable<int> GetChildLayerIndices(RhinoDoc doc,int layerIdx) {
+            return GetChildLayers(doc,layerIdx).Select(layer => layer.Index);
+        }
+
+        static Layer TraverseLayers(RhinoDoc doc,IMember member,ref Queue<string> layerQueue,Guid parentLayerId) {
             if (string.IsNullOrEmpty(member.LayerInfo.RawLayerName))
-                return FindComponentTypeRootLayer(member.Component);
+                return FindComponentTypeRootLayer(doc,member.Component);
 
-            var parentLayer = Settings.ActiveDoc.Layers.FindId(parentLayerId);
+            var parentLayer = doc.Layers.FindId(parentLayerId);
             if (parentLayer == null) return null;
 
-            var layerName = ComposeComponentLayerName(member.Component, layerQueue.Dequeue());
+            var layerName = ComposeComponentLayerName(member.Component,layerQueue.Dequeue());
             var layerPath = $"{parentLayer.FullPath}::{layerName}";
-            var docLayerIdx = Settings.ActiveDoc.Layers.FindByFullPath(layerPath, -1);
-            var docLayer = Settings.ActiveDoc.Layers.FindIndex(docLayerIdx);
+            var docLayerIdx = doc.Layers.FindByFullPath(layerPath,-1);
+            var docLayer = doc.Layers.FindIndex(docLayerIdx);
             if (docLayer == null && member.LayerInfo != null) {
                 docLayer = new Layer() {
                     Name = layerName,
@@ -318,29 +296,28 @@ namespace D2P.Core.Utility {
                     ParentLayerId = parentLayerId,
                     Color = member.LayerInfo.LayerColor
                 };
-                docLayer.Index = Settings.ActiveDoc.Layers.Add(docLayer);
+                docLayer.Index = doc.Layers.Add(docLayer);
             }
             if (docLayer == null || !layerQueue.Any())
                 return docLayer;
-            return TraverseLayers(member, ref layerQueue, docLayer.Id);
+            return TraverseLayers(doc,member,ref layerQueue,docLayer.Id);
         }
-        static void TraverseAncestorLayers(Guid parentLayerId, ref List<Layer> ancestorLayers)
-        {
+
+        static void TraverseAncestorLayers(RhinoDoc doc,Guid parentLayerId,ref List<Layer> ancestorLayers) {
             if (parentLayerId == Guid.Empty) return;
-            var parentLayer = Settings.ActiveDoc.Layers.FindId(parentLayerId);
+            var parentLayer = doc.Layers.FindId(parentLayerId);
             ancestorLayers.Add(parentLayer);
-            TraverseAncestorLayers(parentLayer.ParentLayerId, ref ancestorLayers);
+            TraverseAncestorLayers(doc,parentLayer.ParentLayerId,ref ancestorLayers);
         }
-        static void TraverseChildLayers(Guid layerId, ref List<Layer> childLayers)
-        {
+
+        static void TraverseChildLayers(RhinoDoc doc,Guid layerId,ref List<Layer> childLayers) {
             if (layerId == Guid.Empty) return;
-            var layer = Settings.ActiveDoc.Layers.FindId(layerId);
+            var layer = doc.Layers.FindId(layerId);
             childLayers.Add(layer);
             var children = layer.GetChildren();
             if (children == null) return;
-            foreach (var childLayer in children) {
-                TraverseChildLayers(childLayer.Id, ref childLayers);
-            }
+            foreach (var childLayer in children)
+                TraverseChildLayers(doc,childLayer.Id,ref childLayers);
         }
     }
 }

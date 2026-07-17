@@ -10,8 +10,7 @@
 
 namespace D2P.GHPlugin.Properties {
     using System;
-    
-    
+
     /// <summary>
     ///   Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
     /// </summary>

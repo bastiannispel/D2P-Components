@@ -1,54 +1,48 @@
-﻿using D2P.Core.Interfaces;
-using Rhino;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+
+using D2P.Core.Interfaces;
+
+using Rhino;
 
 namespace D2P.Core.Utility {
     public static class RHDoc {
-        public static void Purge(RhinoDoc doc)
-        {
+        public static void Purge(RhinoDoc doc) {
             foreach (var layer in doc.Layers) {
-                if (doc.Objects.FindByLayer(layer).Length == 0) {
-                    doc.Layers.Delete(layer, true);
-                }
+                if (doc.Objects.FindByLayer(layer).Length == 0)
+                    doc.Layers.Delete(layer,true);
             }
         }
 
-        internal static RhinoDoc CreateHeadless(RhinoDoc doc)
-        {
+        internal static RhinoDoc CreateHeadless(RhinoDoc doc) {
             var headlessDoc = RhinoDoc.CreateHeadless(doc.Name);
-            headlessDoc.Layers.SetCurrentLayerIndex(0, true);
-            foreach (var dimStyle in doc.DimStyles) {
-                headlessDoc.DimStyles.Add(dimStyle, false);
-            }
-            foreach (var layer in doc.Layers) {
+            headlessDoc.Layers.SetCurrentLayerIndex(0,true);
+            foreach (var dimStyle in doc.DimStyles)
+                headlessDoc.DimStyles.Add(dimStyle,false);
+            foreach (var layer in doc.Layers)
                 headlessDoc.Layers.Add(layer);
-            }
-            headlessDoc.Layers.SetCurrentLayerIndex(0, true);
+            headlessDoc.Layers.SetCurrentLayerIndex(0,true);
             return headlessDoc;
         }
 
-        public static void UpdateComponentLayerColors(IEnumerable<IComponentBase> components)
-        {
+        public static void UpdateComponentLayerColors(RhinoDoc doc,IEnumerable<IComponentBase> components) {
             foreach (var compGrp in components.GroupBy(c => c.TypeId)) {
                 var component = compGrp.First();
-                UpdateComponentTypeLayerColors(component);
-                UpdateComponentSublayerColors(component);
+                UpdateComponentTypeLayerColors(doc,component);
+                UpdateComponentSublayerColors(doc,component);
             }
         }
 
-        static void UpdateComponentTypeLayerColors(IComponentBase component)
-        {
-            var rhLayer = Layers.FindComponentTypeRootLayer(component);
+        static void UpdateComponentTypeLayerColors(RhinoDoc doc,IComponentBase component) {
+            var rhLayer = Layers.FindComponentTypeRootLayer(doc,component);
             if (rhLayer == null || rhLayer.Color == component.LayerColor)
                 return;
             rhLayer.Color = component.LayerColor;
         }
 
-        static void UpdateComponentSublayerColors(IComponentBase component)
-        {
+        static void UpdateComponentSublayerColors(RhinoDoc doc,IComponentBase component) {
             foreach (var member in component.AllMembers) {
-                var rhLayer = Layers.FindLayer(member, out int _);
+                var rhLayer = Layers.FindLayer(doc,member,out int _);
                 if (rhLayer == null ||
                     member?.LayerInfo == null ||
                     rhLayer.Color == member.LayerInfo.LayerColor ||
