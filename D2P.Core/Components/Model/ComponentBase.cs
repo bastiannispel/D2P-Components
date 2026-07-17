@@ -66,7 +66,6 @@ namespace D2P.Core.Components {
 
         protected virtual void Init() {
             Label = new Member<TextEntity>(this,"",LayerColor);
-
         }
 
         public abstract IComponentBase Duplicate();
@@ -119,7 +118,6 @@ namespace D2P.Core.Components {
 
             TypeId = attribute.TypeId;
             TypeName = attribute.Name ?? string.Empty;
-            LabelSize = attribute.LabelSize;
         }
 
         public bool Transform(Transform xform) {

@@ -5,7 +5,6 @@ namespace D2P.Core.Components {
     public sealed class ComponentTypeAttribute : Attribute {
         public new string TypeId { get; }
         public string Name { get; }
-        public double LabelSize { get; set; } = 1.0;
 
         public ComponentTypeAttribute(string typeId,string name) {
             TypeId = typeId;
