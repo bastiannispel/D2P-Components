@@ -5,8 +5,7 @@ namespace D2P.Core.Exceptions {
         public Type ComponentType { get; }
 
         public ComponentTypeAttributeMissingException(Type componentType)
-            : base($"Component type '{componentType.FullName}' must be decorated with [ComponentType].")
-        {
+            : base($"Component type '{componentType.FullName}' must be decorated with [ComponentType].") {
             ComponentType = componentType;
         }
     }

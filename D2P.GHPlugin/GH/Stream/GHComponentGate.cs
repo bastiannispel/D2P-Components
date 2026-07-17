@@ -13,17 +13,15 @@ namespace D2P.GHPlugin.GH.Stream {
         /// Initializes a new instance of the Utility_RakeComponents class.
         /// </summary>
         public GHComponentGate()
-          : base("ComponentGate", "Gate",
+          : base("ComponentGate","Gate",
               "Sorts the input component-instances by their type-ids and automatically populates the output parameters",
-              "D2P", "00 Stream")
-        { }
+              "D2P","00 Stream") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Components", "C", "The in-memory representation of the component instances", GH_ParamAccess.tree);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Components","C","The in-memory representation of the component instances",GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -35,9 +33,8 @@ namespace D2P.GHPlugin.GH.Stream {
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
-            if (!DA.GetDataTree(0, out GH_Structure<IGH_Goo> componentTree))
+        protected override void SolveInstance(IGH_DataAccess DA) {
+            if (!DA.GetDataTree(0,out GH_Structure<IGH_Goo> componentTree))
                 return;
 
             _components = componentTree.Select(x => new GH_ObjectWrapper(x).Value as IComponentBase).ToList();
@@ -45,16 +42,16 @@ namespace D2P.GHPlugin.GH.Stream {
 
             var componentGroups = _components.GroupBy(comp => comp.TypeId);
             if (DA.Iteration == 0) {
-                _properties = componentGroups.ToDictionary(grp => grp.First().TypeId, c => typeof(Enumerable));
+                _properties = componentGroups.ToDictionary(grp => grp.First().TypeId,c => typeof(Enumerable));
             }
 
             if (OutputMismatch() && DA.Iteration == 0) {
-                OnPingDocument().ScheduleSolution(5, d => {
+                OnPingDocument().ScheduleSolution(5,d => {
                     CreateOutputParams(false);
                 });
             }
             else {
-                SetDataTrees(DA, componentTree);
+                SetDataTrees(DA,componentTree);
             }
         }
 

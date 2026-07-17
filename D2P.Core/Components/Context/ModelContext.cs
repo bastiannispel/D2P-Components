@@ -12,12 +12,10 @@ namespace D2P.Core.Components {
         public IComponentRepository Repository { get; }
 
         public ModelContext(RhinoDoc document)
-            : this(document, ctx => new RhinoComponentRepository(ctx))
-        {
+            : this(document,ctx => new RhinoComponentRepository(ctx)) {
         }
 
-        public ModelContext(RhinoDoc document, Func<ModelContext, IComponentRepository> createRepository)
-        {
+        public ModelContext(RhinoDoc document,Func<ModelContext,IComponentRepository> createRepository) {
             Document = document ?? throw new ArgumentNullException(nameof(document));
             if (createRepository == null)
                 throw new ArgumentNullException(nameof(createRepository));
@@ -25,7 +23,7 @@ namespace D2P.Core.Components {
             Registry = new ComponentRegistry();
             var componentAttribute = typeof(Component).GetCustomAttribute<ComponentTypeAttribute>(inherit: false);
             if (componentAttribute != null)
-                Registry.Register(new TypeRegistration(typeof(Component), componentAttribute));
+                Registry.Register(new TypeRegistration(typeof(Component),componentAttribute));
             else
                 Registry.Register<Component>("COMP");
             Repository = createRepository(this);

@@ -12,56 +12,52 @@ namespace D2P.GHPlugin.GH.Create {
         /// Initializes a new instance of the CreateComponent class.
         /// </summary>
         public GHCreateComponent()
-          : base("CreateComponent", "Component",
+          : base("CreateComponent","Component",
               "Creates a component instance based on a specific type",
-              "D2P", "01 Create")
-        { }
+              "D2P","01 Create") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>  
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Type", "T", "The type definition for this component instance. This will define where the component will be baked into the layer-tree of the Rhino document", GH_ParamAccess.item);
-            pManager.AddTextParameter("Name", "N", "The name of the component instance. This will define the name of all objects within this component after baking it to the Rhino document", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "The plane used to create the text-label for the component after baking to the Rhino Document", GH_ParamAccess.item);
-            pManager.AddGenericParameter("ParentMember", "C", "The parent component or name used to create the inherent name of this component", GH_ParamAccess.item);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Type","T","The type definition for this component instance. This will define where the component will be baked into the layer-tree of the Rhino document",GH_ParamAccess.item);
+            pManager.AddTextParameter("Name","N","The name of the component instance. This will define the name of all objects within this component after baking it to the Rhino document",GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane","P","The plane used to create the text-label for the component after baking to the Rhino Document",GH_ParamAccess.item);
+            pManager.AddGenericParameter("ParentMember","C","The parent component or name used to create the inherent name of this component",GH_ParamAccess.item);
             pManager[3].Optional = true;
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of the defined component instance", GH_ParamAccess.item);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of the defined component instance",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             ComponentType componentType = null;
             var name = string.Empty;
             var plane = Plane.Unset;
             GHComponent parent = null;
 
-            DA.GetData(0, ref componentType);
-            DA.GetData(1, ref name);
-            DA.GetData(2, ref plane);
-            DA.GetData(3, ref parent);
+            DA.GetData(0,ref componentType);
+            DA.GetData(1,ref name);
+            DA.GetData(2,ref plane);
+            DA.GetData(3,ref parent);
 
             var parentName = parent?.ShortName ?? parent?.ToString();
             name = string.IsNullOrEmpty(parentName) ? name : $"{parentName}{Settings.NameDelimiter}{name}";
 
             var context = _modelContext;
-            var component = new GHComponent(componentType, name, plane);
+            var component = new GHComponent(componentType,name,plane);
             context.Repository.Attach(component);
             _components.Add(component);
 
-            DA.SetData(0, component);
+            DA.SetData(0,component);
         }
 
         /// <summary>

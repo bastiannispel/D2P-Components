@@ -11,39 +11,35 @@ namespace D2P.GHPlugin.GH.Stream {
         /// Initializes a new instance of the GHStreamComponentTypes class.
         /// </summary>
         public GHStreamComponentTypes()
-          : base("StreamComponentTypes", "StreamTypes",
+          : base("StreamComponentTypes","StreamTypes",
               "Stream component-types from the Rhino document. Sorts them by their type-ids and automatically populates the output parameters",
-              "D2P", "00 Stream")
-        { }
+              "D2P","00 Stream") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
-        { }
+        protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager) { }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
-        { }
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager) { }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             var componentTypes = _modelContext.Repository.GetComponentTypes();
 
             if (DA.Iteration == 0)
-                _properties = componentTypes.ToDictionary(compType => compType.TypeId, compType => typeof(ComponentType));
+                _properties = componentTypes.ToDictionary(compType => compType.TypeId,compType => typeof(ComponentType));
 
             if (OutputMismatch() && DA.Iteration == 0)
-                OnPingDocument().ScheduleSolution(5, d => CreateOutputParams(false));
+                OnPingDocument().ScheduleSolution(5,d => CreateOutputParams(false));
             else {
                 foreach (var compType in componentTypes) {
-                    DA.SetData(compType.TypeId, compType);
+                    DA.SetData(compType.TypeId,compType);
                 }
             }
         }

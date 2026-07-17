@@ -15,21 +15,18 @@ namespace D2P.Core.Components {
 
         public ModelContext Context => _context;
 
-        public RhinoComponentRepository(ModelContext context)
-        {
+        public RhinoComponentRepository(ModelContext context) {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public void Attach(IComponentBase component)
-        {
+        public void Attach(IComponentBase component) {
             component.Context = _context;
             foreach (var member in component.AllMembers)
-                AttachMember(component, member);
+                AttachMember(component,member);
         }
 
-        public T? GetFromObject<T>(RhinoObject obj) where T : class, IComponentBase
-        {
-            var groupIds = Utility.Objects.GetObjectGroupIDs(_context.Document, obj.Id);
+        public T? GetFromObject<T>(RhinoObject obj) where T : class, IComponentBase {
+            var groupIds = Utility.Objects.GetObjectGroupIDs(_context.Document,obj.Id);
             foreach (var groupIndex in groupIds) {
                 var component = GetByGroup<T>(groupIndex);
                 if (component != null)
@@ -38,16 +35,14 @@ namespace D2P.Core.Components {
             return null;
         }
 
-        public IEnumerable<T> GetFromObjects<T>(IEnumerable<Guid> objectIds) where T : class, IComponentBase
-        {
+        public IEnumerable<T> GetFromObjects<T>(IEnumerable<Guid> objectIds) where T : class, IComponentBase {
             var rhObjects = objectIds
                 .Select(id => _context.Document.Objects.Find(id))
                 .Where(obj => obj != null);
             return GetFromObjects<T>(rhObjects);
         }
 
-        public IEnumerable<IComponentBase> GetByType(string typeId, FilterOptions? filter = null)
-        {
+        public IEnumerable<IComponentBase> GetByType(string typeId,FilterOptions? filter = null) {
             filter ??= new FilterOptions();
             var nameFilter = $"{typeId}{Settings.TypeDelimiter}*";
             var objEnumSettings = Utility.Constants.ObjectEnumeratorSettings(nameFilter);
@@ -59,8 +54,7 @@ namespace D2P.Core.Components {
             return GetFromObjects<IComponentBase>(rhObjects);
         }
 
-        public IEnumerable<T> GetByType<T>(FilterOptions? filter = null) where T : class, IComponentBase
-        {
+        public IEnumerable<T> GetByType<T>(FilterOptions? filter = null) where T : class, IComponentBase {
             filter ??= new FilterOptions();
             if (!_context.Registry.TryResolveType<T>(out var typeId))
                 return Enumerable.Empty<T>();
@@ -74,8 +68,7 @@ namespace D2P.Core.Components {
             return GetFromObjects<T>(rhObjects);
         }
 
-        public IEnumerable<T> GetByName<T>(string nameFilter) where T : class, IComponentBase
-        {
+        public IEnumerable<T> GetByName<T>(string nameFilter) where T : class, IComponentBase {
             var objEnumSettings = Utility.Constants.ObjectEnumeratorSettings(nameFilter);
             var rhObjects = _context.Document.Objects
                 .GetObjectList(objEnumSettings)
@@ -83,66 +76,55 @@ namespace D2P.Core.Components {
             return GetFromObjects<T>(rhObjects);
         }
 
-        public T? GetByGroup<T>(int groupIndex) where T : class, IComponentBase
-        {
+        public T? GetByGroup<T>(int groupIndex) where T : class, IComponentBase {
             return HydrateFromGroup<T>(groupIndex);
         }
 
-        public T? GetParent<T>(IComponentBase component, out int parentsFound) where T : class, IComponentBase
-        {
-            return GetParent(component, out parentsFound) as T;
+        public T? GetParent<T>(IComponentBase component,out int parentsFound) where T : class, IComponentBase {
+            return GetParent(component,out parentsFound) as T;
         }
 
-        public IEnumerable<T> GetChildren<T>(IComponentBase component, IEnumerable<string>? filterTypes = null) where T : class, IComponentBase
-        {
-            return GetChildren(component, filterTypes).OfType<T>();
+        public IEnumerable<T> GetChildren<T>(IComponentBase component,IEnumerable<string>? filterTypes = null) where T : class, IComponentBase {
+            return GetChildren(component,filterTypes).OfType<T>();
         }
 
-        public IEnumerable<T> GetJoints<T>(IComponentBase component, IEnumerable<string>? filterTypes = null) where T : class, IComponentBase
-        {
-            return GetJoints(component, filterTypes).OfType<T>();
+        public IEnumerable<T> GetJoints<T>(IComponentBase component,IEnumerable<string>? filterTypes = null) where T : class, IComponentBase {
+            return GetJoints(component,filterTypes).OfType<T>();
         }
 
-        public IEnumerable<T> GetConnected<T>(IComponentBase component, IEnumerable<string>? typeFilter = null) where T : class, IComponentBase
-        {
-            return GetConnected(component, typeFilter).OfType<T>();
+        public IEnumerable<T> GetConnected<T>(IComponentBase component,IEnumerable<string>? typeFilter = null) where T : class, IComponentBase {
+            return GetConnected(component,typeFilter).OfType<T>();
         }
 
-        public IEnumerable<IComponentType> GetComponentTypes()
-        {
+        public IEnumerable<IComponentType> GetComponentTypes() {
             var componentTypeLayers = Utility.Layers.FindComponentTypeRootLayers(_context.Document);
-            return componentTypeLayers.Select(layer => new ComponentType(_context.Document, layer));
+            return componentTypeLayers.Select(layer => new ComponentType(_context.Document,layer));
         }
 
-        public void Save(IComponentBase component, RepositoryOptions? options = null)
-        {
+        public void Save(IComponentBase component,RepositoryOptions? options = null) {
             options ??= new RepositoryOptions();
             Attach(component);
-            component.Commit(options.DeleteExisting, options.OnlyDirty);
+            component.Commit(options.DeleteExisting,options.OnlyDirty);
             if (options.OnlyDirty)
                 MarkClean(component);
         }
 
-        public void SaveMany(IEnumerable<IComponentBase> components, RepositoryOptions? options = null)
-        {
+        public void SaveMany(IEnumerable<IComponentBase> components,RepositoryOptions? options = null) {
             options ??= new RepositoryOptions();
             foreach (var component in components)
-                Save(component, options);
+                Save(component,options);
         }
 
-        public void Delete(IComponentBase component)
-        {
+        public void Delete(IComponentBase component) {
             Attach(component);
             component.Delete();
         }
 
-        public IComponentTransaction BeginTransaction()
-        {
+        public IComponentTransaction BeginTransaction() {
             return new ComponentTransaction(this);
         }
 
-        IEnumerable<T> GetFromObjects<T>(IEnumerable<RhinoObject> rhObjects) where T : class, IComponentBase
-        {
+        IEnumerable<T> GetFromObjects<T>(IEnumerable<RhinoObject> rhObjects) where T : class, IComponentBase {
             var components = new List<T>();
             var groupIndices = rhObjects
                 .SelectMany(obj => obj.GetGroupList())
@@ -155,21 +137,20 @@ namespace D2P.Core.Components {
             return components;
         }
 
-        T? HydrateFromGroup<T>(int groupIndex) where T : class, IComponentBase
-        {
-            var grpObjects = Utility.Objects.ObjectsByGroup(_context.Document, groupIndex);
+        T? HydrateFromGroup<T>(int groupIndex) where T : class, IComponentBase {
+            var grpObjects = Utility.Objects.ObjectsByGroup(_context.Document,groupIndex);
             foreach (var txtLabel in grpObjects.OfType<TextObject>()) {
                 if (!txtLabel.Name.Contains(txtLabel.TextGeometry.PlainText))
                     continue;
 
-                var componentType = Utility.Objects.GetComponentTypeFromObject(_context.Document, txtLabel);
-                if (!_context.Registry.TryResolve(componentType.TypeId, out var registration)) {
+                var componentType = Utility.Objects.GetComponentTypeFromObject(_context.Document,txtLabel);
+                if (!_context.Registry.TryResolve(componentType.TypeId,out var registration)) {
                     try {
                         _context.Registry.Register<Component>(componentType.TypeId);
-                        _context.Registry.TryResolve(componentType.TypeId, out registration);
+                        _context.Registry.TryResolve(componentType.TypeId,out registration);
                     }
                     catch {
-                        registration = new TypeRegistration(typeof(Component), componentType.TypeId);
+                        registration = new TypeRegistration(typeof(Component),componentType.TypeId);
                     }
                 }
 
@@ -200,7 +181,7 @@ namespace D2P.Core.Components {
                 var isGenericType = registration.ClrType == typeof(Component)
                     || registration.ClrType.GetCustomAttribute<ComponentTypeAttribute>(inherit: false) == null;
                 if (isGenericType) {
-                    var members = Utility.Members.FindMembers(_context.Document, component);
+                    var members = Utility.Members.FindMembers(_context.Document,component);
                     component.SetMembers(members);
                 }
 
@@ -209,15 +190,14 @@ namespace D2P.Core.Components {
             return null;
         }
 
-        IComponentBase? GetParent(IComponentBase component, out int parentsFound)
-        {
+        IComponentBase? GetParent(IComponentBase component,out int parentsFound) {
             parentsFound = 0;
             var parentNameSegments = component.ShortName.Split(Settings.NameDelimiter).ToList();
             if (parentNameSegments.Count <= 1)
                 return null;
 
             parentNameSegments.RemoveAt(parentNameSegments.Count - 1);
-            var parentName = string.Join(Settings.NameDelimiter.ToString(), parentNameSegments);
+            var parentName = string.Join(Settings.NameDelimiter.ToString(),parentNameSegments);
             var namingCondition = $"*{Settings.TypeDelimiter}{parentName}";
             var objEnumSettings = Utility.Constants.ObjectEnumeratorSettings(namingCondition);
             var rhObjects = _context.Document.Objects.GetObjectList(objEnumSettings);
@@ -226,8 +206,7 @@ namespace D2P.Core.Components {
             return parents.FirstOrDefault();
         }
 
-        IEnumerable<IComponentBase> GetChildren(IComponentBase component, IEnumerable<string>? filterTypes = null)
-        {
+        IEnumerable<IComponentBase> GetChildren(IComponentBase component,IEnumerable<string>? filterTypes = null) {
             var namingCondition = $"*{Settings.TypeDelimiter}{component.ShortName}{Settings.NameDelimiter}*";
             var objEnumSettings = Utility.Constants.ObjectEnumeratorSettings(namingCondition);
             var rhObjects = _context.Document.Objects.GetObjectList(objEnumSettings)
@@ -237,14 +216,13 @@ namespace D2P.Core.Components {
             return GetFromObjects<IComponentBase>(rhObjects);
         }
 
-        IEnumerable<IComponentBase> GetJoints(IComponentBase component, IEnumerable<string>? filterTypes = null)
-        {
+        IEnumerable<IComponentBase> GetJoints(IComponentBase component,IEnumerable<string>? filterTypes = null) {
             var namingCondition = $"*{component.ShortName}*";
             var objEnumSettings = Utility.Constants.ObjectEnumeratorSettings(namingCondition);
             var escapedString = $"(.*{Settings.TypeDelimiter}{component.ShortName}{Settings.JointDelimiter}.*)" +
                 $"|(.*{Settings.JointDelimiter}{component.ShortName}{Settings.JointDelimiter}.*)" +
                 $"|(.*{Settings.JointDelimiter}{component.ShortName}$)";
-            escapedString = escapedString.Replace("+", "\\+");
+            escapedString = escapedString.Replace("+","\\+");
             var reg = new Regex(escapedString);
             var rhObjects = _context.Document.Objects.GetObjectList(objEnumSettings)
                 .Where(rhObj => reg.IsMatch(rhObj.Name));
@@ -253,8 +231,7 @@ namespace D2P.Core.Components {
             return GetFromObjects<IComponentBase>(rhObjects);
         }
 
-        IEnumerable<IComponentBase> GetConnected(IComponentBase component, IEnumerable<string>? typeFilter = null)
-        {
+        IEnumerable<IComponentBase> GetConnected(IComponentBase component,IEnumerable<string>? typeFilter = null) {
             IEnumerable<IComponentBase> joints;
             if (component.ShortName.Contains(Settings.JointDelimiter))
                 joints = component.ShortName.Split(Settings.JointDelimiter)
@@ -273,22 +250,19 @@ namespace D2P.Core.Components {
             return connectedComponents;
         }
 
-        static void AttachMember(IComponentBase component, IMember member)
-        {
+        static void AttachMember(IComponentBase component,IMember member) {
             member.Component = component;
             foreach (var child in member.AllMembers)
-                AttachMember(component, child);
+                AttachMember(component,child);
         }
 
-        static void MarkClean(IComponentBase component)
-        {
+        static void MarkClean(IComponentBase component) {
             component.MarkClean();
             foreach (var member in component.AllMembers)
                 MarkClean(member);
         }
 
-        static void MarkClean(IMember member)
-        {
+        static void MarkClean(IMember member) {
             member.MarkClean();
             foreach (var child in member.AllMembers)
                 MarkClean(child);

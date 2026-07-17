@@ -7,42 +7,38 @@ using Grasshopper.Kernel;
 namespace D2P.GHPlugin.GH.Stream {
     public class GHStreamComponents : GHComponentPreview {
         public GHStreamComponents()
-          : base("StreamComponents", "Stream",
+          : base("StreamComponents","Stream",
               "Stream component-instances from rhino by providing their GUIDs",
-              "D2P", "00 Stream")
-        { }
+              "D2P","00 Stream") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
             var guidParam = new Grasshopper.Kernel.Parameters.Param_Guid();
-            pManager.AddParameter(guidParam, "ComponentIDs", "IDs", "The GUIDs of Rhino component-instances", GH_ParamAccess.list);
+            pManager.AddParameter(guidParam,"ComponentIDs","IDs","The GUIDs of Rhino component-instances",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Components", "C", "The in-memory representation of component-instances", GH_ParamAccess.list);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("Components","C","The in-memory representation of component-instances",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             var ids = new List<Guid>();
-            DA.GetDataList(0, ids);
+            DA.GetDataList(0,ids);
 
             var context = _modelContext;
             _components = context.Repository.GetFromObjects<D2P.Core.Interfaces.IComponentBase>(ids).ToList();
             _components.Sort();
 
-            DA.SetDataList(0, _components);
+            DA.SetDataList(0,_components);
         }
 
         /// <summary>

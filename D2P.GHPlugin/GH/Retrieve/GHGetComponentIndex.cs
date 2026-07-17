@@ -11,46 +11,42 @@ namespace D2P.GHPlugin.GH.Retrieve {
         /// Initializes a new instance of the GHGetComponentIndex class.
         /// </summary>
         public GHGetComponentIndex()
-          : base("GetComponentIndex", "IndexOf",
+          : base("GetComponentIndex","IndexOf",
               "Gets the index of a component within a joint name",
-              "D2P", "02 Retrieve")
-        { }
+              "D2P","02 Retrieve") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Joint Component", "J", "The in-memory representation of the defined joint component instance", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of the defined component instance", GH_ParamAccess.item);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Joint Component","J","The in-memory representation of the defined joint component instance",GH_ParamAccess.item);
+            pManager.AddGenericParameter("Component","C","The in-memory representation of the defined component instance",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddIntegerParameter("Index", "I", "The index of the component within the joint name", GH_ParamAccess.item);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddIntegerParameter("Index","I","The index of the component within the joint name",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase joint = null;
             IComponentBase component = null;
 
-            DA.GetData(0, ref joint);
-            DA.GetData(1, ref component);
+            DA.GetData(0,ref joint);
+            DA.GetData(1,ref component);
 
             var connectedComponents = joint?.ShortName.Split(Settings.JointDelimiter);
-            var index = Array.IndexOf(connectedComponents, component?.ShortName);
+            var index = Array.IndexOf(connectedComponents,component?.ShortName);
 
             if (index >= 0)
-                DA.SetData(0, index);
-            else DA.SetData(0, null);
+                DA.SetData(0,index);
+            else DA.SetData(0,null);
         }
 
         /// <summary>

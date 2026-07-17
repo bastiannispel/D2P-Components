@@ -13,9 +13,8 @@ namespace D2P.GHPlugin {
 
         public GHComponent() : base() { }
         protected GHComponent(IComponentBase other) : base(other) { }
-        public GHComponent(IComponentType type, string name, Plane plane)
-            : base(name, plane)
-        {
+        public GHComponent(IComponentType type,string name,Plane plane)
+            : base(name,plane) {
             TypeId = type.TypeId;
             TypeName = type.TypeName;
             LayerColor = type.LayerColor;
@@ -23,8 +22,7 @@ namespace D2P.GHPlugin {
             Label.Geometry.First().TextHeight = LabelSize;
         }
 
-        public override IComponentBase Duplicate()
-        {
+        public override IComponentBase Duplicate() {
             return new GHComponent(this);
         }
     }

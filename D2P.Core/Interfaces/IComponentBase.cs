@@ -27,7 +27,7 @@ namespace D2P.Core.Interfaces {
 
         bool Transform(Transform xform);
         void Cache();
-        void Commit(bool deleteExisting, bool onlyDirty);
+        void Commit(bool deleteExisting,bool onlyDirty);
         void MarkClean();
     }
 }

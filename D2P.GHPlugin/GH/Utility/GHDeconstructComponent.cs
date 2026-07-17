@@ -11,44 +11,40 @@ namespace D2P.GHPlugin.GH.Utility {
         /// Initializes a new instance of the DeconstructComponent class.
         /// </summary>
         public GHDeconstructComponent()
-          : base("DeconstructComponent", "DeComp",
+          : base("DeconstructComponent","DeComp",
               "Deconstructs a component",
-              "D2P", "04 Utility")
-        { }
+              "D2P","04 Utility") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance", GH_ParamAccess.item);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of a component instance",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
             var guidParam = new Grasshopper.Kernel.Parameters.Param_Guid();
-            pManager.AddParameter(guidParam, "GUID", "ID", "The GUID of the component-instance", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Type", "T", "The type definition for this component instance", GH_ParamAccess.item);
-            pManager.AddTextParameter("Name", "N", "The name of the component instance", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "The plane of the component instance", GH_ParamAccess.item);
+            pManager.AddParameter(guidParam,"GUID","ID","The GUID of the component-instance",GH_ParamAccess.item);
+            pManager.AddGenericParameter("Type","T","The type definition for this component instance",GH_ParamAccess.item);
+            pManager.AddTextParameter("Name","N","The name of the component instance",GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane","P","The plane of the component instance",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase component = null;
-            DA.GetData(0, ref component);
+            DA.GetData(0,ref component);
 
-            DA.SetData(0, component?.ID);
-            DA.SetData(1, new ComponentType(component.TypeId, component.TypeName, component.LabelSize, component.LayerColor));
-            DA.SetData(2, component?.ShortName);
-            DA.SetData(3, component?.Plane);
+            DA.SetData(0,component?.ID);
+            DA.SetData(1,new ComponentType(component.TypeId,component.TypeName,component.LabelSize,component.LayerColor));
+            DA.SetData(2,component?.ShortName);
+            DA.SetData(3,component?.Plane);
 
             _components.Add(component);
         }

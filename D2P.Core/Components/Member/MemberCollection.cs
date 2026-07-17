@@ -8,7 +8,7 @@ using D2P.Core.Utility;
 
 namespace D2P.Core.Components.Member {
     public abstract class MemberCollection : IMemberCollection {
-        protected Dictionary<string, IMember> _dynamicMembers = new Dictionary<string, IMember>();
+        protected Dictionary<string,IMember> _dynamicMembers = new Dictionary<string,IMember>();
 
         public IMember ParentMember { get; set; }
 
@@ -18,7 +18,7 @@ namespace D2P.Core.Components.Member {
         public IEnumerable<IMember> DynamicMembers {
             get => _dynamicMembers.Values;
             set => _dynamicMembers = value.ToDictionary(
-                m => Layers.ComposeFullLayerPath(DocHelper.Require(m), m),
+                m => Layers.ComposeFullLayerPath(DocHelper.Require(m),m),
                 m => m);
         }
         public IEnumerable<IMember> StaticMembers {
@@ -33,31 +33,27 @@ namespace D2P.Core.Components.Member {
                 .OfType<IMember>();
         }
 
-        public virtual void SetMember(IMember member)
-        {
+        public virtual void SetMember(IMember member) {
             var doc = DocHelper.Require(member);
-            var key = Layers.ComposeFullLayerPath(doc, member);
+            var key = Layers.ComposeFullLayerPath(doc,member);
             if (_dynamicMembers.ContainsKey(key))
                 _dynamicMembers.Remove(key);
-            _dynamicMembers.Add(key, member);
+            _dynamicMembers.Add(key,member);
         }
-        public void SetMembers(IEnumerable<IMember> members)
-        {
+        public void SetMembers(IEnumerable<IMember> members) {
             foreach (var member in members)
                 SetMember(member);
         }
-        public IMember FindMember(IComponentBase component, string layerName, out int membersFound)
-        {
-            var matchedMembers = FindMembers(component, layerName);
+        public IMember FindMember(IComponentBase component,string layerName,out int membersFound) {
+            var matchedMembers = FindMembers(component,layerName);
             membersFound = matchedMembers.Count();
             return matchedMembers?.FirstOrDefault();
         }
 
-        public IEnumerable<IMember> FindMembers(IComponentBase component, string layerName)
-        {
+        public IEnumerable<IMember> FindMembers(IComponentBase component,string layerName) {
             var doc = DocHelper.Require(component);
-            var allMembersFlattened = Members.FindMembers(doc, component).Flatten();
-            var memberDict = allMembersFlattened.ToDictionary(m => Layers.ComposeMemberLayerName(m), m => m);
+            var allMembersFlattened = Members.FindMembers(doc,component).Flatten();
+            var memberDict = allMembersFlattened.ToDictionary(m => Layers.ComposeMemberLayerName(m),m => m);
             return memberDict
                 .Where(item => item.Key.Contains(layerName))
                 .Select(item => item.Value);

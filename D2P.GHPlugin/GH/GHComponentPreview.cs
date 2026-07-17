@@ -22,20 +22,17 @@ namespace D2P.GHPlugin.GH {
 
         public override BoundingBox ClippingBox => _box;
 
-        protected GHComponentPreview(string name, string shortname, string description, string category, string subcategory)
-        : base(name, shortname, description, category, subcategory)
-        { }
+        protected GHComponentPreview(string name,string shortname,string description,string category,string subcategory)
+        : base(name,shortname,description,category,subcategory) { }
 
-        protected override void BeforeSolveInstance()
-        {
+        protected override void BeforeSolveInstance() {
             base.BeforeSolveInstance();
             _components.Clear();
             _geometries.Clear();
             _box = BoundingBox.Empty;
         }
 
-        protected override void AfterSolveInstance()
-        {
+        protected override void AfterSolveInstance() {
             base.AfterSolveInstance();
             foreach (var comp in _components) {
                 var allGeo = Members.GetAllMemberGeometries(comp);
@@ -44,8 +41,7 @@ namespace D2P.GHPlugin.GH {
             _box = ComputeClippingBox(_geometries);
         }
 
-        public override void DrawViewportWires(IGH_PreviewArgs args)
-        {
+        public override void DrawViewportWires(IGH_PreviewArgs args) {
             if (Hidden || Locked)
                 return;
 
@@ -57,21 +53,20 @@ namespace D2P.GHPlugin.GH {
             foreach (var geo in _geometries) {
                 switch (geo.ObjectType) {
                     case ObjectType.Annotation:
-                        args.Display.DrawAnnotation(geo as AnnotationBase, fill);
+                        args.Display.DrawAnnotation(geo as AnnotationBase,fill);
                         break;
                     case ObjectType.Curve:
-                        args.Display.DrawCurve(geo as Curve, fill);
+                        args.Display.DrawCurve(geo as Curve,fill);
                         break;
                     case ObjectType.TextDot:
-                        args.Display.DrawDot(geo as TextDot, fill, edge, edge);
+                        args.Display.DrawDot(geo as TextDot,fill,edge,edge);
                         break;
                     default:
                         break;
                 }
             }
         }
-        public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        {
+        public override void DrawViewportMeshes(IGH_PreviewArgs args) {
             if (Hidden || Locked)
                 return;
 
@@ -82,10 +77,10 @@ namespace D2P.GHPlugin.GH {
             foreach (var geo in _geometries) {
                 switch (geo.ObjectType) {
                     case ObjectType.Brep:
-                        args.Display.DrawBrepShaded(geo as Brep, fill);
+                        args.Display.DrawBrepShaded(geo as Brep,fill);
                         break;
                     case ObjectType.Extrusion:
-                        args.Display.DrawBrepShaded((geo as Extrusion).ToBrep(), fill);
+                        args.Display.DrawBrepShaded((geo as Extrusion).ToBrep(),fill);
                         break;
                     default:
                         break;
@@ -93,8 +88,7 @@ namespace D2P.GHPlugin.GH {
             }
         }
 
-        static BoundingBox ComputeClippingBox(IEnumerable<GeometryBase> geometry)
-        {
+        static BoundingBox ComputeClippingBox(IEnumerable<GeometryBase> geometry) {
             var box = BoundingBox.Empty;
             foreach (var geo in geometry) {
                 if (geo == null)

@@ -18,7 +18,7 @@ namespace D2P.Core.Components {
 
     public sealed class ComponentRegistry {
 
-        readonly Dictionary<string, TypeRegistration> _registrations = new Dictionary<string, TypeRegistration>(StringComparer.Ordinal);
+        readonly Dictionary<string,TypeRegistration> _registrations = new Dictionary<string,TypeRegistration>(StringComparer.Ordinal);
 
 
 
@@ -28,18 +28,14 @@ namespace D2P.Core.Components {
 
 
 
-        public void Register<T>(string typeId) where T : class, IComponentBase
+        public void Register<T>(string typeId) where T : class, IComponentBase {
 
-        {
-
-            Register(typeof(T), new TypeRegistration(typeof(T), typeId));
+            Register(typeof(T),new TypeRegistration(typeof(T),typeId));
 
         }
 
 
-        public void RegisterFromCallingAssembly()
-
-        {
+        public void RegisterFromCallingAssembly() {
 
             RegisterFromAssembly(Assembly.GetCallingAssembly());
 
@@ -47,9 +43,7 @@ namespace D2P.Core.Components {
 
 
 
-        public void RegisterFromAssembly(Assembly assembly)
-
-        {
+        public void RegisterFromAssembly(Assembly assembly) {
 
             foreach (var type in GetComponentTypes(assembly)) {
 
@@ -61,7 +55,7 @@ namespace D2P.Core.Components {
 
 
 
-                Register(type, new TypeRegistration(type, attribute));
+                Register(type,new TypeRegistration(type,attribute));
 
             }
 
@@ -69,30 +63,25 @@ namespace D2P.Core.Components {
 
 
 
-        public void Register(TypeRegistration registration)
+        public void Register(TypeRegistration registration) {
 
-        {
-
-            Register(registration.ClrType, registration);
+            Register(registration.ClrType,registration);
 
         }
 
 
 
-        public bool TryResolve(string typeId, out TypeRegistration registration)
-        {
-            return _registrations.TryGetValue(typeId, out registration);
+        public bool TryResolve(string typeId,out TypeRegistration registration) {
+            return _registrations.TryGetValue(typeId,out registration);
         }
 
 
 
-        public bool TryResolveType<T>(out string typeId) where T : class, IComponentBase
-
-        {
+        public bool TryResolveType<T>(out string typeId) where T : class, IComponentBase {
 
             var match = _registrations.FirstOrDefault(entry => entry.Value.ClrType == typeof(T));
 
-            if (match.Equals(default(KeyValuePair<string, TypeRegistration>))) {
+            if (match.Equals(default(KeyValuePair<string,TypeRegistration>))) {
 
                 typeId = string.Empty;
 
@@ -110,31 +99,27 @@ namespace D2P.Core.Components {
 
 
 
-        void Register(Type clrType, TypeRegistration registration)
+        void Register(Type clrType,TypeRegistration registration) {
 
-        {
-
-            if (_registrations.TryGetValue(registration.TypeId, out var existing)) {
+            if (_registrations.TryGetValue(registration.TypeId,out var existing)) {
 
                 if (existing.ClrType == clrType)
 
                     return;
 
-                throw new TypeIdAlreadyRegisteredException(registration.TypeId, existing.ClrType, clrType);
+                throw new TypeIdAlreadyRegisteredException(registration.TypeId,existing.ClrType,clrType);
 
             }
 
 
 
-            _registrations.Add(registration.TypeId, registration);
+            _registrations.Add(registration.TypeId,registration);
 
         }
 
 
 
-        static IEnumerable<Type> GetComponentTypes(Assembly assembly)
-
-        {
+        static IEnumerable<Type> GetComponentTypes(Assembly assembly) {
 
             return assembly.GetTypes()
 
@@ -148,9 +133,7 @@ namespace D2P.Core.Components {
 
 
 
-        static bool IsExcludedFromScan(Type type)
-
-        {
+        static bool IsExcludedFromScan(Type type) {
 
             if (type == typeof(Component))
 

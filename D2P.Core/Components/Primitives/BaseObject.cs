@@ -12,11 +12,10 @@ namespace D2P.Core.Components.Primitives {
 
         public BaseObject(RhinoObject rhObj) : base(rhObj) { }
         public BaseObject(T geometry) : base(geometry) { }
-        public BaseObject(T geometry, ObjectAttributes attributes) : base(geometry, attributes) { }
+        public BaseObject(T geometry,ObjectAttributes attributes) : base(geometry,attributes) { }
 
-        public new IBaseObject<T> Duplicate()
-        {
-            return new BaseObject<T>((T)Geometry.Duplicate(), Attributes.Duplicate());
+        public new IBaseObject<T> Duplicate() {
+            return new BaseObject<T>((T)Geometry.Duplicate(),Attributes.Duplicate());
         }
     }
 
@@ -25,21 +24,18 @@ namespace D2P.Core.Components.Primitives {
         public ObjectAttributes Attributes { get; set; }
         public Guid Id => Attributes.ObjectId;
 
-        public BaseObject(RhinoObject rhObj) : this(rhObj.Geometry, rhObj.Attributes) { }
-        public BaseObject(GeometryBase geometry) : this(geometry, new ObjectAttributes()) { }
-        public BaseObject(GeometryBase geometry, ObjectAttributes attributes)
-        {
+        public BaseObject(RhinoObject rhObj) : this(rhObj.Geometry,rhObj.Attributes) { }
+        public BaseObject(GeometryBase geometry) : this(geometry,new ObjectAttributes()) { }
+        public BaseObject(GeometryBase geometry,ObjectAttributes attributes) {
             Geometry = geometry;
             Attributes = attributes;
         }
-        private BaseObject(IBaseObject other)
-        {
+        private BaseObject(IBaseObject other) {
             Geometry = other.Geometry.Duplicate();
             Attributes = other.Attributes.Duplicate();
         }
 
-        public IBaseObject Duplicate()
-        {
+        public IBaseObject Duplicate() {
             return new BaseObject(this);
         }
     }

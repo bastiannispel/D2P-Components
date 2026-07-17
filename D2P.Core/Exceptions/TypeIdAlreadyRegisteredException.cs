@@ -6,9 +6,8 @@ namespace D2P.Core.Exceptions {
         public Type ExistingType { get; }
         public Type RequestedType { get; }
 
-        public TypeIdAlreadyRegisteredException(string typeId, Type existingType, Type requestedType)
-            : base($"TypeId '{typeId}' is already registered to {existingType.Name}. Cannot register {requestedType.Name}.")
-        {
+        public TypeIdAlreadyRegisteredException(string typeId,Type existingType,Type requestedType)
+            : base($"TypeId '{typeId}' is already registered to {existingType.Name}. Cannot register {requestedType.Name}.") {
             TypeId = typeId;
             ExistingType = existingType;
             RequestedType = requestedType;

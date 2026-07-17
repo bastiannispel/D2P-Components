@@ -13,44 +13,40 @@ namespace D2P.GHPlugin.GH.Modify {
         /// Initializes a new instance of the Component_AddGeometryWithLayer class.
         /// </summary>
         public GHRegisterComponentMembers()
-          : base("RegisterComponentMembers", "RegisterMembers",
+          : base("RegisterComponentMembers","RegisterMembers",
               "Registers geometry and attributes to an in-memory representation of a component instance",
-              "D2P", "03 Modify")
-        { }
+              "D2P","03 Modify") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance to process", GH_ParamAccess.item);
-            pManager.AddGenericParameter("ComponentMembers", "M", "The component-members to add to the input component", GH_ParamAccess.list);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of a component instance to process",GH_ParamAccess.item);
+            pManager.AddGenericParameter("ComponentMembers","M","The component-members to add to the input component",GH_ParamAccess.list);
             pManager[1].Optional = true;
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Components", "C", "The in-memory representation of the component instances extended by geometries and attributes", GH_ParamAccess.tree);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("Components","C","The in-memory representation of the component instances extended by geometries and attributes",GH_ParamAccess.tree);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase component = null;
             var componentMembers = new List<Member>();
 
-            DA.GetData(0, ref component);
-            DA.GetDataList(1, componentMembers);
+            DA.GetData(0,ref component);
+            DA.GetDataList(1,componentMembers);
 
             if (component == null) {
                 var msg = $"Component is null !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
@@ -59,7 +55,7 @@ namespace D2P.GHPlugin.GH.Modify {
             componentClone.SetMembers(componentMembers);
 
             _components.Add(componentClone);
-            DA.SetData(0, componentClone);
+            DA.SetData(0,componentClone);
         }
 
         /// <summary>

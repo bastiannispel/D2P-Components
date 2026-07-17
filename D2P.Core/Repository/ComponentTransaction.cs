@@ -12,32 +12,27 @@ namespace D2P.Core.Components {
         readonly uint _undoRecord;
         bool _completed;
 
-        public ComponentTransaction(RhinoComponentRepository repository)
-        {
+        public ComponentTransaction(RhinoComponentRepository repository) {
             _repository = repository;
             _document = repository.Context.Document;
             _undoRecord = _document.BeginUndoRecord("D2P Save Components");
         }
 
-        public void Save(IEnumerable<IComponentBase> components, RepositoryOptions? options = null)
-        {
-            _repository.SaveMany(components, options);
+        public void Save(IEnumerable<IComponentBase> components,RepositoryOptions? options = null) {
+            _repository.SaveMany(components,options);
             Complete();
         }
 
-        public void Rollback()
-        {
+        public void Rollback() {
             _completed = true;
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             if (!_completed)
                 _document.EndUndoRecord(_undoRecord);
         }
 
-        void Complete()
-        {
+        void Complete() {
             _completed = true;
             _document.EndUndoRecord(_undoRecord);
         }

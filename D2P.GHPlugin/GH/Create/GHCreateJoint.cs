@@ -14,60 +14,56 @@ namespace D2P.GHPlugin.GH.Create {
         /// Initializes a new instance of the GHCreateJoint class.
         /// </summary>
         public GHCreateJoint()
-          : base("CreateJoint", "Joint",
+          : base("CreateJoint","Joint",
               "Creates a joint-component instance based on a specific type and related components",
-              "D2P", "01 Create")
-        { }
+              "D2P","01 Create") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Type", "T", "The type definition for this component instance. This will define where the component will be baked into the layer-tree of the Rhino document", GH_ParamAccess.item);
-            pManager.AddPlaneParameter("Plane", "P", "The plane used to create the text-label for the component after baking to the Rhino Document", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Components", "C", "The components used to create the joint-relation of this component", GH_ParamAccess.list);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Type","T","The type definition for this component instance. This will define where the component will be baked into the layer-tree of the Rhino document",GH_ParamAccess.item);
+            pManager.AddPlaneParameter("Plane","P","The plane used to create the text-label for the component after baking to the Rhino Document",GH_ParamAccess.item);
+            pManager.AddGenericParameter("Components","C","The components used to create the joint-relation of this component",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of the defined component instance", GH_ParamAccess.item);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of the defined component instance",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             ComponentType componentType = null;
             var plane = Plane.Unset;
             var components = new List<GHComponent>();
 
-            DA.GetData(0, ref componentType);
-            DA.GetData(1, ref plane);
-            DA.GetDataList(2, components);
+            DA.GetData(0,ref componentType);
+            DA.GetData(1,ref plane);
+            DA.GetDataList(2,components);
 
             var componentNames = components.Select(c => c?.ShortName ?? string.Empty);
-            var name = string.Join(Settings.JointDelimiter.ToString(), componentNames);
+            var name = string.Join(Settings.JointDelimiter.ToString(),componentNames);
             if (!componentNames.Any() || componentNames.Contains(string.Empty)) {
                 var msg = $"Invalid Joint Name {name} !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
             else if (componentNames.Count() == 1) {
                 var msg = $"Please provide more than one component to create a joint !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
-            var component = new GHComponent(componentType, name, plane);
+            var component = new GHComponent(componentType,name,plane);
             _components.Add(component);
 
-            DA.SetData(0, component);
+            DA.SetData(0,component);
         }
 
         /// <summary>

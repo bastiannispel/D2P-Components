@@ -12,57 +12,53 @@ namespace D2P.GHPlugin.GH.Retrieve {
         /// Initializes a new instance of the Component_RetrieveParentComponent class.
         /// </summary>
         public GHRetrieveChildren()
-          : base("RetrieveChildComponents", "ChildMembers",
+          : base("RetrieveChildComponents","ChildMembers",
               "Retrieves child components of a given input component. E.g. If the parent-instance is named “aa” all child-instances are named “aa.01”, “aa.02”, “aa.03”, etc.",
-              "D2P", "02 Retrieve")
-        { }
+              "D2P","02 Retrieve") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance to process", GH_ParamAccess.item);
-            pManager.AddTextParameter("TypeIDFilter", "F", "A list of type-ids to return only children of specific component-types", GH_ParamAccess.list);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of a component instance to process",GH_ParamAccess.item);
+            pManager.AddTextParameter("TypeIDFilter","F","A list of type-ids to return only children of specific component-types",GH_ParamAccess.list);
             pManager[1].Optional = true;
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("ChildComponents", "C", "The in-memory representation of the component-child instances", GH_ParamAccess.list);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("ChildComponents","C","The in-memory representation of the component-child instances",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase component = null;
             List<string> filterTypes = new List<string>();
-            DA.GetData(0, ref component);
-            DA.GetDataList(1, filterTypes);
+            DA.GetData(0,ref component);
+            DA.GetDataList(1,filterTypes);
 
             if (component == null) {
                 var msg = $"Component is null !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
             var repository = (component.Context ?? _modelContext).Repository;
             repository.Attach(component);
-            var children = repository.GetChildren<IComponentBase>(component, filterTypes);
+            var children = repository.GetChildren<IComponentBase>(component,filterTypes);
             if (children == null || !children.Any()) {
                 var msg = $"ChildMembers of component {component.Name} not found !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
             _components.AddRange(children);
-            DA.SetDataList(0, children);
+            DA.SetDataList(0,children);
         }
 
         /// <summary>

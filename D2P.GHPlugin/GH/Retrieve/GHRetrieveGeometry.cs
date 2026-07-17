@@ -14,74 +14,68 @@ namespace D2P.GHPlugin.GH.Retrieve {
         /// Initializes a new instance of the Component_LayerObjects class.
         /// </summary>
         public GHRetrieveGeometry()
-          : base("RetrieveGeometry", "RetrieveGeo",
+          : base("RetrieveGeometry","RetrieveGeo",
               "Retrieves geometry of a component-instance",
-              "D2P", "02 Retrieve")
-        { }
+              "D2P","02 Retrieve") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance", GH_ParamAccess.item);
-            pManager.AddTextParameter("LayerName", "L", "The name of the layer below the root-layer of a component", GH_ParamAccess.item);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of a component instance",GH_ParamAccess.item);
+            pManager.AddTextParameter("LayerName","L","The name of the layer below the root-layer of a component",GH_ParamAccess.item);
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGeometryParameter("Geometry", "G", "The geometry of the defined layer and scope", GH_ParamAccess.list);
-            pManager.AddGenericParameter("GUID", "ID", "The geometry id of the defined layer and scope", GH_ParamAccess.list);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGeometryParameter("Geometry","G","The geometry of the defined layer and scope",GH_ParamAccess.list);
+            pManager.AddGenericParameter("GUID","ID","The geometry id of the defined layer and scope",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase component = null;
             var layerName = string.Empty;
 
-            DA.GetData(0, ref component);
-            DA.GetData(1, ref layerName);
+            DA.GetData(0,ref component);
+            DA.GetData(1,ref layerName);
 
             if (component == null) {
                 var msg = $"Component is null !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
-            var matchedMembers = component.FindMembers(component, layerName);
+            var matchedMembers = component.FindMembers(component,layerName);
             if (!matchedMembers.Any()) {
                 var msg = $"Member with LayerName '{layerName}' not found !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
             else if (matchedMembers.Count() > 1 && !_getGeometryRecursive) {
                 var msg = $"Found {matchedMembers.Count()} members with layerName {layerName}, specify full path !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
             var geometry = matchedMembers.SelectMany(m => m.BaseObjects.Select(b => b.Geometry));
             var ids = matchedMembers.SelectMany(m => m.BaseObjects.Select(b => b.Id));
-            DA.SetDataList(0, geometry);
-            DA.SetDataList(1, ids);
+            DA.SetDataList(0,geometry);
+            DA.SetDataList(1,ids);
         }
 
 
-        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        {
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu) {
             base.AppendAdditionalComponentMenuItems(menu);
-            Menu_AppendItem(menu, "Get geometry recursively", ClickOnGetGeometryRecursively, true, _getGeometryRecursive);
+            Menu_AppendItem(menu,"Get geometry recursively",ClickOnGetGeometryRecursively,true,_getGeometryRecursive);
         }
 
-        private void ClickOnGetGeometryRecursively(object sender, EventArgs e)
-        {
+        private void ClickOnGetGeometryRecursively(object sender,EventArgs e) {
             _getGeometryRecursive = !_getGeometryRecursive;
             ExpireSolution(true);
         }

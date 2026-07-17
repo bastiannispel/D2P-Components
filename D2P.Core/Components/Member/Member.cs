@@ -22,14 +22,14 @@ namespace D2P.Core.Components.Member {
                 var typedObjects = baseObjects.OfType<IBaseObject<T>>();
                 var untypedObjects = baseObjects
                      .Where(o => o.Geometry is T && !(o is IBaseObject<T>))
-                     .Select(o => new BaseObject<T>((T)o.Geometry, o.Attributes));
+                     .Select(o => new BaseObject<T>((T)o.Geometry,o.Attributes));
                 return typedObjects.Concat(untypedObjects);
             }
             set => base.BaseObjects = value.Cast<IBaseObject>();
         }
 
-        public Member(IComponentBase component, ILayerInfo layerInfo) : base(component, layerInfo) { }
-        public Member(IComponentBase component, string rawLayerName, Color layerColor) : base(component, rawLayerName, layerColor) { }
+        public Member(IComponentBase component,ILayerInfo layerInfo) : base(component,layerInfo) { }
+        public Member(IComponentBase component,string rawLayerName,Color layerColor) : base(component,rawLayerName,layerColor) { }
         protected Member(IMember<T> other) : base(other) { }
 
         void IMember<T>.SetObject(IBaseObject<T> baseObject) => base.SetObject(baseObject);
@@ -57,10 +57,10 @@ namespace D2P.Core.Components.Member {
                 if (_objects != null)
                     return _objects;
                 var doc = DocHelper.Require(this);
-                var layer = Layers.FindLayer(doc, this);
+                var layer = Layers.FindLayer(doc,this);
                 if (layer == null)
                     return _objects = Enumerable.Empty<IBaseObject>();
-                return _objects = Objects.ObjectsByLayer(doc, Component, layer.Index)
+                return _objects = Objects.ObjectsByLayer(doc,Component,layer.Index)
                    .Select(obj => new BaseObject(obj))
                    .ToList();
             }
@@ -69,15 +69,13 @@ namespace D2P.Core.Components.Member {
                 MarkDirty();
             }
         }
-        public Member(IComponentBase component, ILayerInfo layerInfo)
-        {
+        public Member(IComponentBase component,ILayerInfo layerInfo) {
             Component = component;
             LayerInfo = layerInfo;
         }
-        public Member(IComponentBase component, string rawLayerName, Color layerColor)
-            : this(component, new LayerInfo(rawLayerName, layerColor)) { }
-        protected Member(IMember other)
-        {
+        public Member(IComponentBase component,string rawLayerName,Color layerColor)
+            : this(component,new LayerInfo(rawLayerName,layerColor)) { }
+        protected Member(IMember other) {
             ParentMember = other.ParentMember;
             Component = other.Component;
             LayerInfo = other.LayerInfo;
@@ -85,43 +83,36 @@ namespace D2P.Core.Components.Member {
             DynamicMembers = other.DynamicMembers.Duplicate();
         }
 
-        public void SetObject(IBaseObject obj)
-        {
+        public void SetObject(IBaseObject obj) {
             _objects = new[] { obj };
             MarkDirty();
         }
-        public void SetObjects(IEnumerable<IBaseObject> objects)
-        {
+        public void SetObjects(IEnumerable<IBaseObject> objects) {
             _objects = objects;
             MarkDirty();
         }
-        public void SetObject(GeometryBase geometry)
-        {
+        public void SetObject(GeometryBase geometry) {
             _objects = new[] { new BaseObject(geometry) };
             MarkDirty();
         }
-        public void SetObjects(IEnumerable<GeometryBase> geometry)
-        {
+        public void SetObjects(IEnumerable<GeometryBase> geometry) {
             _objects = geometry.Select(g => new BaseObject(g)).ToList();
             MarkDirty();
         }
         void IMember.SetObject(IBaseObject baseObject) => SetObject(baseObject);
         void IMember.SetObjects(IEnumerable<IBaseObject> baseObjects) => SetObjects(baseObjects);
 
-        public override void SetMember(IMember member)
-        {
+        public override void SetMember(IMember member) {
             member.ParentMember = this;
             base.SetMember(member);
             MarkDirty();
         }
 
-        public void Commit(bool deleteExisting)
-        {
-            Commit(deleteExisting, false);
+        public void Commit(bool deleteExisting) {
+            Commit(deleteExisting,false);
         }
 
-        public void Commit(bool deleteExisting, bool onlyDirty)
-        {
+        public void Commit(bool deleteExisting,bool onlyDirty) {
             if (Component == null || !Component.Exists())
                 return;
 
@@ -131,16 +122,15 @@ namespace D2P.Core.Components.Member {
             foreach (var childMember in AllMembers) {
                 childMember.ParentMember = this;
                 childMember.Component = Component;
-                childMember.Commit(deleteExisting, onlyDirty);
+                childMember.Commit(deleteExisting,onlyDirty);
             }
 
             MarkClean();
         }
 
-        void UpdateDoc()
-        {
+        void UpdateDoc() {
             var doc = DocHelper.Require(this);
-            var memberLayer = Layers.CreateLayer(doc, this);
+            var memberLayer = Layers.CreateLayer(doc,this);
 
             if (_objects == null) return;
             Delete();
@@ -152,17 +142,16 @@ namespace D2P.Core.Components.Member {
                 obj.Attributes.LayerIndex = memberLayer.Index;
 
                 if (obj.Geometry == null) continue;
-                var id = doc.Objects.Add(obj.Geometry, obj.Attributes);
+                var id = doc.Objects.Add(obj.Geometry,obj.Attributes);
                 obj.Attributes.ObjectId = id;
             }
         }
 
         public bool Exists() => Geometry.Any();
-        public void Delete()
-        {
+        public void Delete() {
             var doc = DocHelper.Require(this);
-            var layer = Layers.FindLayer(doc, this);
-            Objects.DeleteObjects(doc, Component, layer, true);
+            var layer = Layers.FindLayer(doc,this);
+            Objects.DeleteObjects(doc,Component,layer,true);
             foreach (var member in AllMembers)
                 member.Delete();
         }
@@ -171,8 +160,7 @@ namespace D2P.Core.Components.Member {
 
         public void MarkClean() => IsDirty = false;
 
-        void MarkDirty()
-        {
+        void MarkDirty() {
             IsDirty = true;
             if (Component is ComponentBase componentBase)
                 componentBase.MarkDirty();

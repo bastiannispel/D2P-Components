@@ -12,18 +12,16 @@ using Grasshopper.Kernel.Types;
 
 namespace D2P.GHPlugin.GH {
     public abstract class GHVariableParameterComponent : GHComponentPreview, IGH_VariableParameterComponent {
-        protected Dictionary<string, Type> _properties = new Dictionary<string, Type>();
+        protected Dictionary<string,Type> _properties = new Dictionary<string,Type>();
 
-        protected GHVariableParameterComponent(string name, string shortname, string description, string category, string subcategory)
-        : base(name, shortname, description, category, subcategory)
-        { }
+        protected GHVariableParameterComponent(string name,string shortname,string description,string category,string subcategory)
+        : base(name,shortname,description,category,subcategory) { }
 
-        protected void SetDataTrees(IGH_DataAccess DA, GH_Structure<IGH_Goo> componentTree)
-        {
+        protected void SetDataTrees(IGH_DataAccess DA,GH_Structure<IGH_Goo> componentTree) {
             var outTrees = new List<GH_Structure<IGH_Goo>>();
-            var typesDictionary = new Dictionary<string, int>();
+            var typesDictionary = new Dictionary<string,int>();
             for (int i = 0; i < _properties.Count; i++) {
-                typesDictionary.Add(_properties.Keys.ElementAt(i), i);
+                typesDictionary.Add(_properties.Keys.ElementAt(i),i);
                 outTrees.Add(new GH_Structure<IGH_Goo>());
             }
 
@@ -34,18 +32,17 @@ namespace D2P.GHPlugin.GH {
                     var component = compWrapper.Value as IComponentBase;
                     var typeIdx = typesDictionary[component.TypeId];
                     var path = new GH_Path(p);
-                    outTrees[typeIdx].Append(compWrapper, path);
+                    outTrees[typeIdx].Append(compWrapper,path);
                 }
             }
 
             for (int i = 0; i < outTrees.Count; i++) {
-                DA.SetDataTree(i, outTrees[i]);
+                DA.SetDataTree(i,outTrees[i]);
             }
 
         }
 
-        protected bool OutputMismatch()
-        {
+        protected bool OutputMismatch() {
             var countMatch = _properties.Count == Params.Output.Count;
             if (!countMatch) return true;
 
@@ -57,14 +54,13 @@ namespace D2P.GHPlugin.GH {
             return false;
         }
 
-        protected void CreateOutputParams(bool recompute)
-        {
+        protected void CreateOutputParams(bool recompute) {
             var paramCount = _properties.Count;
             if (paramCount == 0) return;
             if (OutputMismatch()) {
                 if (Params.Output.Count < paramCount) {
                     while (Params.Output.Count < paramCount) {
-                        var new_param = CreateParameter(GH_ParameterSide.Output, Params.Output.Count);
+                        var new_param = CreateParameter(GH_ParameterSide.Output,Params.Output.Count);
                         Params.RegisterOutputParam(new_param);
                     }
                 }
@@ -80,33 +76,27 @@ namespace D2P.GHPlugin.GH {
             }
         }
 
-        protected virtual bool OutputParamsAreValid()
-        {
+        protected virtual bool OutputParamsAreValid() {
             return true;
         }
 
-        public bool CanInsertParameter(GH_ParameterSide side, int index)
-        {
+        public bool CanInsertParameter(GH_ParameterSide side,int index) {
             return false;
         }
 
-        public bool CanRemoveParameter(GH_ParameterSide side, int index)
-        {
+        public bool CanRemoveParameter(GH_ParameterSide side,int index) {
             return false;
         }
 
-        public IGH_Param CreateParameter(GH_ParameterSide side, int index)
-        {
+        public IGH_Param CreateParameter(GH_ParameterSide side,int index) {
             return new Param_GenericObject();
         }
 
-        public bool DestroyParameter(GH_ParameterSide side, int index)
-        {
+        public bool DestroyParameter(GH_ParameterSide side,int index) {
             return true;
         }
 
-        public void VariableParameterMaintenance()
-        {
+        public void VariableParameterMaintenance() {
             if (_properties == null) return;
             var names = _properties.Keys;
             for (var i = 0; i < Params.Output.Count; i++) {
@@ -128,8 +118,7 @@ namespace D2P.GHPlugin.GH {
             }
         }
 
-        public override void ClearData()
-        {
+        public override void ClearData() {
             base.ClearData();
             _properties?.Clear();
             if (Params == null || !Params.Any()) return;

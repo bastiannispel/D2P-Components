@@ -12,52 +12,48 @@ namespace D2P.GHPlugin.GH.Retrieve {
         /// Initializes a new instance of the GH_RetrieveConnectedComponents class.
         /// </summary>
         public GHRetrieveConnectedComponents()
-          : base("RetrieveConnectedComponents", "RetrieveConnected",
+          : base("RetrieveConnectedComponents","RetrieveConnected",
               "Retrieves all the components connected to the input components by a joint",
-              "D2P", "02 Retrieve")
-        { }
+              "D2P","02 Retrieve") { }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
-        protected override void RegisterInputParams(GH_InputParamManager pManager)
-        {
-            pManager.AddGenericParameter("Component", "C", "The in-memory representation of a component instance", GH_ParamAccess.item);
-            pManager.AddTextParameter("TypeIDFilter", "F", "A list of type-ids to return only children of specific component-types", GH_ParamAccess.list);
+        protected override void RegisterInputParams(GH_InputParamManager pManager) {
+            pManager.AddGenericParameter("Component","C","The in-memory representation of a component instance",GH_ParamAccess.item);
+            pManager.AddTextParameter("TypeIDFilter","F","A list of type-ids to return only children of specific component-types",GH_ParamAccess.list);
             pManager[1].Optional = true;
         }
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
-        protected override void RegisterOutputParams(GH_OutputParamManager pManager)
-        {
-            pManager.AddGenericParameter("ConnectedComponents", "C", "The in-memory representation of the components connected to the input components", GH_ParamAccess.list);
+        protected override void RegisterOutputParams(GH_OutputParamManager pManager) {
+            pManager.AddGenericParameter("ConnectedComponents","C","The in-memory representation of the components connected to the input components",GH_ParamAccess.list);
         }
 
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
-        {
+        protected override void SolveInstance(IGH_DataAccess DA) {
             IComponentBase component = null;
             var filterTypes = new List<string>();
-            DA.GetData(0, ref component);
-            DA.GetDataList(1, filterTypes);
+            DA.GetData(0,ref component);
+            DA.GetDataList(1,filterTypes);
 
             if (component == null) {
                 var msg = $"Component is null !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning,msg);
                 return;
             }
 
             var repository = (component.Context ?? _modelContext).Repository;
             repository.Attach(component);
-            var connectedComponents = repository.GetConnected<IComponentBase>(component, filterTypes);
+            var connectedComponents = repository.GetConnected<IComponentBase>(component,filterTypes);
             if (connectedComponents == null || !connectedComponents.Any()) {
                 var msg = $"Connected components of component {component.Name} not found !";
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, msg);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Remark,msg);
                 return;
             }
 
@@ -66,7 +62,7 @@ namespace D2P.GHPlugin.GH.Retrieve {
                     _components.Add(comp);
             }
 
-            DA.SetDataList(0, connectedComponents);
+            DA.SetDataList(0,connectedComponents);
         }
 
         /// <summary>
