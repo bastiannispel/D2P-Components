@@ -8,8 +8,6 @@ using System.Linq;
 
 using System.Reflection;
 
-
-
 using D2P.Core.Components.Member;
 
 using D2P.Core.Extensions;
@@ -18,15 +16,11 @@ using D2P.Core.Interfaces;
 
 using D2P.Core.Utility;
 
-
-
 using Rhino;
 
 using Rhino.DocObjects;
 
 using Rhino.Geometry;
-
-
 
 namespace D2P.Core.Components {
 
@@ -35,8 +29,6 @@ namespace D2P.Core.Components {
         public ModelContext Context { get; set; }
 
         public bool IsDirty { get; private set; }
-
-
 
         public Guid ID { get; set; } = Guid.Empty;
 
@@ -60,7 +52,6 @@ namespace D2P.Core.Components {
 
         }
 
-
         public virtual string TypeId { get; set; } = "COMP";
 
         public virtual string TypeName { get; set; } = "Base Component";
@@ -69,13 +60,9 @@ namespace D2P.Core.Components {
 
         public virtual double LabelSize { get; set; } = 5.0;
 
-
-
         public IEnumerable<GeometryBase> Geometry => AllMembers.SelectMany(m => m.Geometry);
 
         public IMember<TextEntity> Label { get; private set; }
-
-
 
         protected virtual void Init() {
             Label = new Member<TextEntity>(this,"",LayerColor);
@@ -83,8 +70,6 @@ namespace D2P.Core.Components {
         }
 
         public abstract IComponentBase Duplicate();
-
-
 
         public ComponentBase() {
             ApplyTypeDefaults();
@@ -124,8 +109,6 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         void ApplyTypeDefaults() {
 
             var attribute = GetType().GetCustomAttribute<ComponentTypeAttribute>(inherit: false);
@@ -134,14 +117,10 @@ namespace D2P.Core.Components {
 
                 return;
 
-
-
             TypeId = attribute.TypeId;
             TypeName = attribute.Name ?? string.Empty;
             LabelSize = attribute.LabelSize;
         }
-
-
 
         public bool Transform(Transform xform) {
 
@@ -163,8 +142,6 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         public virtual bool Exists() {
 
             var doc = Context?.Document;
@@ -173,11 +150,7 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         public virtual void Delete() => Objects.DeleteComponent(DocHelper.Require(this),this);
-
-
 
         public virtual void Commit(bool deleteExisting = true) {
 
@@ -185,13 +158,9 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         public virtual void Commit(bool deleteExisting,bool onlyDirty) {
 
             var doc = DocHelper.Require(this);
-
-
 
             if (deleteExisting) {
 
@@ -205,13 +174,9 @@ namespace D2P.Core.Components {
 
             }
 
-
-
             if (!Exists())
 
                 create(doc);
-
-
 
             AllMembers.SetComponent(this);
 
@@ -223,13 +188,9 @@ namespace D2P.Core.Components {
 
             }
 
-
-
             MarkClean();
 
         }
-
-
 
         void create(RhinoDoc doc) {
 
@@ -239,21 +200,15 @@ namespace D2P.Core.Components {
 
             GroupIndex = grpIdx;
 
-
-
             var componentLayer = Layers.FindComponentTypeRootLayer(doc,this);
 
             if (componentLayer == null || componentLayer.Index == 0)
 
                 componentLayer = Layers.CreateComponentTypeLayer(doc,this);
 
-
-
             var attributes = new ObjectAttributes() { Name = Name,LayerIndex = componentLayer.Index };
 
             attributes.AddToGroup(GroupIndex);
-
-
 
             var label = Label.Geometry.FirstOrDefault();
 
@@ -263,8 +218,6 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         public virtual void Cache() {
 
             foreach (var member in AllMembers)
@@ -272,8 +225,6 @@ namespace D2P.Core.Components {
                 member.Cache();
 
         }
-
-
 
         public void MarkClean() {
 
@@ -283,21 +234,15 @@ namespace D2P.Core.Components {
 
         }
 
-
-
         internal void MarkDirty() {
 
             IsDirty = true;
 
         }
 
-
-
         public int CompareTo(object obj) {
 
             if (obj == null) return 1;
-
-
 
             var other = obj as IComponentBase;
 
